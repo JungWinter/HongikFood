@@ -88,17 +88,17 @@ def update():
         admin.updateData()
         ex_message[1]["message"]["text"] = admin.getMenu()
         ex_message[2]["message"]["text"] = admin.getMenu(1)
-        app.logger.info("[Menu Data Update]")
+        app.logger.info("u[Menu Data Update]")
 
 @app.route("/api/keyboard", methods=["GET"])
 def y_keyboard():
-    app.logger.info("[Keyboard Call]")
+    app.logger.info(u"[Keyboard Call]")
     return jsonify(ex_keyboard)
 
 @app.route("/api/message", methods=["POST"])
 def y_message():
     app.logger.info(
-        "[message] user_key : {}, type : {}, content : {}".format(
+        "u[message] user_key : {}, type : {}, content : {}".format(
             request.json["user_key"],
             request.json["type"],
             request.json["content"]
@@ -107,7 +107,7 @@ def y_message():
     try:
         update()
     except:
-        app.logger.error("[Menu Update Error]")
+        app.logger.error("u[Menu Update Error]")
         return jsonify(ex_fail), 500
     index = 0
     try:
@@ -116,28 +116,28 @@ def y_message():
                 index = i+1
                 break
     except:
-        app.logger.error("[Message Error]")
+        app.logger.error("u[Message Error]")
         return jsonify(ex_fail), 500
     return jsonify(ex_message[index])
 
 @app.route("/api/friend", methods=["POST"])
 def y_friend_add():
-    app.logger.info("[JOIN] user_key : {}".format(request.json["user_key"]))
+    app.logger.info("u[JOIN] user_key : {}".format(request.json["user_key"]))
     return jsonify(ex_success)
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def y_friend_block(key):
-    app.logger.info("[BLOCK] user_key : {}".format(key))
+    app.logger.info("u[BLOCK] user_key : {}".format(key))
     return jsonify(ex_success)
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def y_exit(key):
-    app.logger.info("[EXIT] user_key : {}".format(key))
+    app.logger.info("u[EXIT] user_key : {}".format(key))
     return jsonify(ex_success)
 
 @app.errorhandler(500)
 def internal_server_error(error):
-    app.logger.error("[ERROR] : {}".format(error))
+    app.logger.error("u[ERROR] : {}".format(error))
     return jsonify(ex_fail), 500
 
 if __name__ == "__main__":
@@ -152,5 +152,5 @@ if __name__ == "__main__":
         "[%(asctime)s][%(levelname)s] %(message)s"
     ))
     app.logger.addHandler(handler)
-    app.run()
-    #app.run(debug=True, host="0.0.0.0", port=5783)
+    #app.run()
+    app.run(debug=True, host="0.0.0.0", port=5783)
