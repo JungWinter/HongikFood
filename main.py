@@ -108,7 +108,7 @@ def y_message():
         update()
     except:
         app.logger.error("u[Menu Update Error]")
-        return jsonify(ex_fail), 500
+        return jsonify(ex_fail)
     index = 0
     try:
         for i in range(len(keyword)):
@@ -117,7 +117,7 @@ def y_message():
                 break
     except:
         app.logger.error("u[Message Error]")
-        return jsonify(ex_fail), 500
+        return jsonify(ex_fail)
     return jsonify(ex_message[index])
 
 @app.route("/api/friend", methods=["POST"])
@@ -135,10 +135,10 @@ def y_exit(key):
     app.logger.info("u[EXIT] user_key : {}".format(key))
     return jsonify(ex_success)
 
-@app.errorhandler(500)
-def internal_server_error(error):
-    app.logger.error("u[ERROR] : {}".format(error))
-    return jsonify(ex_fail), 500
+# @app.errorhandler(500)
+# def internal_server_error(error):
+#     app.logger.error("u[ERROR] : {}".format(error))
+#     return jsonify(ex_fail), 500
 
 if __name__ == "__main__":
     handler = RotatingFileHandler(
@@ -152,5 +152,5 @@ if __name__ == "__main__":
         "[%(asctime)s][%(levelname)s] %(message)s"
     ))
     app.logger.addHandler(handler)
-    #app.run()
-    app.run(debug=True, host="0.0.0.0", port=5783)
+    app.run()
+    #app.run(debug=True, host="0.0.0.0", port=5783)
