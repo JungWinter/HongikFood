@@ -9,7 +9,6 @@ class Weekend():
         self.data = {
             u"학관" : {
                 u"점심" : "",
-                u"푸드코트" : "",
                 u"저녁" : ""
             },
             u"남문관" : {
@@ -75,22 +74,36 @@ class Manager():
             if count < 6:
                 self.weekends[count].data[u"학관"][u"점심"] = menu
             elif count < 12:
-                self.weekends[count%6].data[u"학관"][u"푸드코트"] = menu
-            elif count < 18:
                 self.weekends[count%6].data[u"학관"][u"저녁"] = menu
-            elif count < 24:
+            # elif count < 18:
+            #     self.weekends[count%6].data[u"학관"][u"저녁"] = menu
+            # elif count < 24:
+            #     self.weekends[count%6].data[u"남문관"][u"점심"] = menu
+            # elif count < 30:
+            #     self.weekends[count%6].data[u"남문관"][u"저녁"] = menu
+            # elif count < 36:
+            #     self.weekends[count%6].data[u"교직원"][u"점심"] = menu
+            # elif count < 42:
+            #     self.weekends[count%6].data[u"교직원"][u"저녁"] = menu
+            # elif count < 48:
+            #     self.weekends[count%6].data[u"신기숙사"][u"아침"] = menu
+            # elif count < 54:
+            #     self.weekends[count%6].data[u"신기숙사"][u"점심"] = menu
+            # elif count < 60:
+            #     self.weekends[count%6].data[u"신기숙사"][u"저녁"] = menu
+            elif count < 18:
                 self.weekends[count%6].data[u"남문관"][u"점심"] = menu
-            elif count < 30:
+            elif count < 24:
                 self.weekends[count%6].data[u"남문관"][u"저녁"] = menu
-            elif count < 36:
+            elif count < 30:
                 self.weekends[count%6].data[u"교직원"][u"점심"] = menu
-            elif count < 42:
+            elif count < 36:
                 self.weekends[count%6].data[u"교직원"][u"저녁"] = menu
-            elif count < 48:
+            elif count < 42:
                 self.weekends[count%6].data[u"신기숙사"][u"아침"] = menu
-            elif count < 54:
+            elif count < 48:
                 self.weekends[count%6].data[u"신기숙사"][u"점심"] = menu
-            elif count < 60:
+            elif count < 54:
                 self.weekends[count%6].data[u"신기숙사"][u"저녁"] = menu
             count += 1
         #print(soup.find("div",class_="daily-menu").get_text())
@@ -108,28 +121,28 @@ class Manager():
         message = ""
         message += self.weekends[wday].date + " " + self.weekends[wday].day + "\n\n"
         message += "<<" + self.titles[0] + ">>\n"
-        message += u"===옛향 (점심)===\n"
+        message += u"===점심 (3,900원)===\n"
         message += self.weekends[wday].data[u"학관"][u"점심"] + "\n\n"
-        message += u"===푸드코트 (점심)===\n"
-        message += self.weekends[wday].data[u"학관"][u"푸드코트"] + "\n\n"
-        message += u"===옛향 (저녁)===\n"
+        message += u"===저녁 (3,900원)===\n"
         message += self.weekends[wday].data[u"학관"][u"저녁"] + "\n\n"
+        # message += u"===옛향 (저녁)===\n"
+        # message += self.weekends[wday].data[u"학관"][u"저녁"] + "\n\n"
         message += "<<" + self.titles[1] + ">>\n"
-        message += u"===남문관 (점심)===\n"
+        message += u"===점심 (3,500원)===\n"
         message += self.weekends[wday].data[u"남문관"][u"점심"] + "\n\n"
-        message += u"===남문관 (저녁)===\n"
+        message += u"===저녁 (3,500원)===\n"
         message += self.weekends[wday].data[u"남문관"][u"저녁"] + "\n\n"
         message += "<<" + self.titles[2] + ">>\n"
-        message += u"===교직원 (점심)===\n"
+        message += u"===점심===\n"
         message += self.weekends[wday].data[u"교직원"][u"점심"] + "\n\n"
-        message += u"===교직원 (저녁)===\n"
+        message += u"===저녁===\n"
         message += self.weekends[wday].data[u"교직원"][u"저녁"] + "\n\n"
         message += "<<" + self.titles[3] + ">>\n"
-        message += u"===신기숙사 (아침)===\n"
+        message += u"===아침 (7:30~9:00)===\n"
         message += self.weekends[wday].data[u"신기숙사"][u"아침"] + "\n\n"
-        message += u"===신기숙사 (점심)===\n"
+        message += u"===점심 (11:30~14:30)===\n"
         message += self.weekends[wday].data[u"신기숙사"][u"점심"] + "\n\n"
-        message += u"===신기숙사 (저녁)===\n"
+        message += u"===저녁 (17:30~19:30)===\n"
         message += self.weekends[wday].data[u"신기숙사"][u"저녁"] + "\n\n"
 
         return message
@@ -145,7 +158,6 @@ class Manager():
         self.data = {
             u"학관" : {
                 u"점심" : "",
-                u"푸드코트" : "",
                 u"저녁" : ""
             },
             u"남문관" : {
@@ -162,3 +174,7 @@ class Manager():
                 u"저녁" : ""
             }
         }
+
+if __name__ == "__main__":
+    admin = Manager()
+    print(admin.getMenu(1))
