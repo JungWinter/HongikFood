@@ -1,15 +1,15 @@
-﻿# -*- coding: utf-8 -*-
+#  -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify
-import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
+import logging
 import requestModule
 import time
 
 app = Flask(__name__)
 
 handler = RotatingFileHandler(
-    "food.log",#app.config["LOG_FILE"],
+    "food.log",
     maxBytes=10000000,
     backupCount=2,
     encoding="utf-8"
@@ -20,23 +20,23 @@ handler.setFormatter(Formatter(
 ))
 app.logger.addHandler(handler)
 
-#log = logging.getLogger('werkzeug')
-#log.setLevel(logging.INFO)
-#log.addHandler(handler)
-    
+#  log = logging.getLogger('werkzeug')
+#  log.setLevel(logging.INFO)
+#  log.addHandler(handler)
+
 ex_keyboard = {
-    "type" : "buttons",
-    "buttons" : [u"오늘의 메뉴", u"내일의 메뉴", u"이번주 메뉴"]
+    "type": "buttons",
+    "buttons": [u"오늘의 메뉴", u"내일의 메뉴", u"이번주 메뉴"]
 }
 
 ex_message = [
     {
-        "message":{
-            "text" : u"제대로 알려주세요!\n어떤 맛있는 메뉴가 기다리고 있을까요?"
+        "message": {
+            "text": u"제대로 알려주세요!\n어떤 맛있는 메뉴가 기다리고 있을까요?"
         },
-        "keyboard" : {
-            "type" : "buttons",
-            "buttons" : [
+        "keyboard": {
+            "type": "buttons",
+            "buttons": [
                 u"오늘의 메뉴",
                 u"내일의 메뉴",
                 u"이번주 메뉴"
@@ -44,12 +44,12 @@ ex_message = [
         }
     },
     {
-        "message":{
-            "text" : u"=오늘의 메뉴=\n밥\n된장국\n돈까스\n뾰로롱"
+        "message": {
+            "text": u"=오늘의 메뉴=\n밥\n된장국\n돈까스\n뾰로롱"
         },
-        "keyboard" : {
-            "type" : "buttons",
-            "buttons" : [
+        "keyboard": {
+            "type": "buttons",
+            "buttons": [
                 u"오늘의 메뉴",
                 u"내일의 메뉴",
                 u"이번주 메뉴"
@@ -57,12 +57,12 @@ ex_message = [
         }
     },
     {
-        "message":{
-            "text" : u"=내일의 메뉴=\n연어덮밥\n먹고싶다\n돈까스도\n먹고싶다"
+        "message": {
+            "text": u"=내일의 메뉴=\n연어덮밥\n먹고싶다\n돈까스도\n먹고싶다"
         },
-        "keyboard" : {
-            "type" : "buttons",
-            "buttons" : [
+        "keyboard": {
+            "type": "buttons",
+            "buttons": [
                 u"오늘의 메뉴",
                 u"내일의 메뉴",
                 u"이번주 메뉴"
@@ -70,16 +70,16 @@ ex_message = [
         }
     },
     {
-        "message":{
-            "text" : "여기서 확인하세요!",
-            "message_button" : {
-                "label" : "이번주 메뉴 보기",
-                "url" : "http://apps.hongik.ac.kr/food/food.php"
+        "message": {
+            "text": "여기서 확인하세요!",
+            "message_button": {
+                "label": "이번주 메뉴 보기",
+                "url": "http://apps.hongik.ac.kr/food/food.php"
             }
         },
-        "keyboard" : {
-            "type" : "buttons",
-            "buttons" : [
+        "keyboard": {
+            "type": "buttons",
+            "buttons": [
                 u"오늘의 메뉴",
                 u"내일의 메뉴",
                 u"이번주 메뉴"
@@ -88,17 +88,18 @@ ex_message = [
     }
 ]
 ex_success = {
-    "message" : "SUCCESS"
+    "message": "SUCCESS"
 }
 ex_fail = {
-    "message" : "FAIL"
+    "message": "FAIL"
 }
 
 user_keys = []
-keyword = [u"오늘",u"내일",u"이번주"]
+keyword = [u"오늘", u"내일", u"이번주"]
 admin = requestModule.Manager()
 ex_message[1]["message"]["text"] = admin.getMenu()
 ex_message[2]["message"]["text"] = admin.getMenu(1)
+
 
 def update():
     if time.time() - admin.lastUpdate > 43200:
@@ -107,16 +108,18 @@ def update():
         ex_message[2]["message"]["text"] = admin.getMenu(1)
         app.logger.warning(u"[Menu Data Update]")
 
+
 @app.route("/api/keyboard", methods=["GET"])
 def y_keyboard():
     return jsonify(ex_keyboard)
+
 
 @app.route("/api/message", methods=["POST"])
 def y_message():
     app.logger.warning(u"[message] user_key : {}, type : {}, content : {}".format(
         request.json["user_key"],
         request.json["type"],
-        request.json["content"]))#.encode("utf-8")))
+        request.json["content"]))
     try:
         update()
     except:
@@ -133,20 +136,24 @@ def y_message():
         return jsonify(ex_fail)
     return jsonify(ex_message[index])
 
+
 @app.route("/api/friend", methods=["POST"])
 def y_friend_add():
     app.logger.warning(u"[JOIN] user_key : {}".format(request.json["user_key"]))
     return jsonify(ex_success)
+
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def y_friend_block(key):
     app.logger.warning(u"[BLOCK] user_key : {}".format(key))
     return jsonify(ex_success)
 
+
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def y_exit(key):
     app.logger.warning(u"[EXIT] user_key : {}".format(key))
     return jsonify(ex_success)
+
 
 @app.errorhandler(500)
 def internal_server_error(error):
@@ -154,9 +161,9 @@ def internal_server_error(error):
     return jsonify(ex_fail), 500
 
 if __name__ == "__main__":
-    #app.config["PROPAGATE_EXCEPTIONS"] = True
-    #app.debug = True
-    #app.config["LOG_FILE"] = "food2.log"
+    # app.config["PROPAGATE_EXCEPTIONS"] = True
+    # app.debug = True
+    # app.config["LOG_FILE"] = "food2.log"
     '''
     handler = RotatingFileHandler(
         "food.log",#app.config["LOG_FILE"],
@@ -171,4 +178,4 @@ if __name__ == "__main__":
     app.logger.addHandler(handler)
     '''
     app.run()
-    #app.run(debug=True, host="0.0.0.0", port=5783)
+    # app.run(debug=True, host="0.0.0.0", port=5783)

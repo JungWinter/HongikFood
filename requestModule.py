@@ -1,31 +1,36 @@
 # -*- coding: utf-8 -*-
-import requests, re, time
+import requests
+import re
+import time
 from bs4 import BeautifulSoup
+
 
 class Weekend():
     def __init__(self, text):
         self.day = text
         self.date = ""
         self.data = {
-            u"학관" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"학관": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"남문관" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"남문관": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"교직원" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"교직원": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"신기숙사" : {
-                u"아침" : "",
-                u"점심" : "",
-                u"저녁" : ""
+            u"신기숙사": {
+                u"아침": "",
+                u"점심": "",
+                u"저녁": ""
             }
         }
-#접근 : mon.data["학관"]["점심"]
+# 접근 : mon.data["학관"]["점심"]
+
+
 class Manager():
     def __init__(self):
         mon = Weekend(u"월요일")
@@ -56,7 +61,7 @@ class Manager():
         check_string = str(soup.find("thead"))
         check_string = "".join(check_string.split('\n'))
         pattern = re.compile(r"([가-힣]{3}).+?(\d{4}[.]\d{2}[.]\d{2})")
-        result = pattern.findall(check_string) #tuple in list
+        result = pattern.findall(check_string)  # tuple in list
         return result
 
     def setDate(self):
@@ -74,43 +79,27 @@ class Manager():
             if count < 6:
                 self.weekends[count].data[u"학관"][u"점심"] = menu
             elif count < 12:
-                self.weekends[count%6].data[u"학관"][u"저녁"] = menu
-            # elif count < 18:
-            #     self.weekends[count%6].data[u"학관"][u"저녁"] = menu
-            # elif count < 24:
-            #     self.weekends[count%6].data[u"남문관"][u"점심"] = menu
-            # elif count < 30:
-            #     self.weekends[count%6].data[u"남문관"][u"저녁"] = menu
-            # elif count < 36:
-            #     self.weekends[count%6].data[u"교직원"][u"점심"] = menu
-            # elif count < 42:
-            #     self.weekends[count%6].data[u"교직원"][u"저녁"] = menu
-            # elif count < 48:
-            #     self.weekends[count%6].data[u"신기숙사"][u"아침"] = menu
-            # elif count < 54:
-            #     self.weekends[count%6].data[u"신기숙사"][u"점심"] = menu
-            # elif count < 60:
-            #     self.weekends[count%6].data[u"신기숙사"][u"저녁"] = menu
+                self.weekends[count % 6].data[u"학관"][u"저녁"] = menu
             elif count < 18:
-                self.weekends[count%6].data[u"남문관"][u"점심"] = menu
+                self.weekends[count % 6].data[u"남문관"][u"점심"] = menu
             elif count < 24:
-                self.weekends[count%6].data[u"남문관"][u"저녁"] = menu
+                self.weekends[count % 6].data[u"남문관"][u"저녁"] = menu
             elif count < 30:
-                self.weekends[count%6].data[u"교직원"][u"점심"] = menu
+                self.weekends[count % 6].data[u"교직원"][u"점심"] = menu
             elif count < 36:
-                self.weekends[count%6].data[u"교직원"][u"저녁"] = menu
+                self.weekends[count % 6].data[u"교직원"][u"저녁"] = menu
             elif count < 42:
-                self.weekends[count%6].data[u"신기숙사"][u"아침"] = menu
+                self.weekends[count % 6].data[u"신기숙사"][u"아침"] = menu
             elif count < 48:
-                self.weekends[count%6].data[u"신기숙사"][u"점심"] = menu
+                self.weekends[count % 6].data[u"신기숙사"][u"점심"] = menu
             elif count < 54:
-                self.weekends[count%6].data[u"신기숙사"][u"저녁"] = menu
+                self.weekends[count % 6].data[u"신기숙사"][u"저녁"] = menu
             count += 1
-        #print(soup.find("div",class_="daily-menu").get_text())
+        # print(soup.find("div",class_="daily-menu").get_text())
 
     def getMenu(self, mode=0):
         # mode : 0 = today, 1 = tomorrow
-        wday = time.localtime()[6] # wday : 0 = monday
+        wday = time.localtime()[6]  # wday : 0 = monday
         message = ""
         if (mode == 0 and wday == 6) or (mode == 1 and wday == 5):
             message = u"메뉴 정보가 없습니다"
@@ -156,22 +145,22 @@ class Manager():
     def dataReset(self):
         self.date = ""
         self.data = {
-            u"학관" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"학관": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"남문관" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"남문관": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"교직원" : {
-                u"점심" : "",
-                u"저녁" : ""
+            u"교직원": {
+                u"점심": "",
+                u"저녁": ""
             },
-            u"신기숙사" : {
-                u"아침" : "",
-                u"점심" : "",
-                u"저녁" : ""
+            u"신기숙사": {
+                u"아침": "",
+                u"점심": "",
+                u"저녁": ""
             }
         }
 
