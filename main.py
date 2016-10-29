@@ -1,7 +1,7 @@
-#  -*- coding: utf-8 -*-
+﻿  # -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify
-from logging import Formatter
 from logging.handlers import RotatingFileHandler
+from logging import Formatter
 import logging
 import requestModule
 import time
@@ -19,10 +19,6 @@ handler.setFormatter(Formatter(
     u"[%(asctime)s] %(message)s"
 ))
 app.logger.addHandler(handler)
-
-#  log = logging.getLogger('werkzeug')
-#  log.setLevel(logging.INFO)
-#  log.addHandler(handler)
 
 ex_keyboard = {
     "type": "buttons",
@@ -155,27 +151,6 @@ def y_exit(key):
     return jsonify(ex_success)
 
 
-@app.errorhandler(500)
-def internal_server_error(error):
-    app.logger.error("u[ERROR] : {}".format(error))
-    return jsonify(ex_fail), 500
-
 if __name__ == "__main__":
-    # app.config["PROPAGATE_EXCEPTIONS"] = True
-    # app.debug = True
-    # app.config["LOG_FILE"] = "food2.log"
-    '''
-    handler = RotatingFileHandler(
-        "food.log",#app.config["LOG_FILE"],
-        maxBytes=10000000,
-        backupCount=2,
-        encoding="utf-8"
-    )
-    handler.setLevel(logging.INFO)
-    handler.setFormatter(Formatter(
-        "[%(asctime)s][%(levelname)s] %(message)s"
-    ))
-    app.logger.addHandler(handler)
-    '''
-    app.run()
-    # app.run(debug=True, host="0.0.0.0", port=5783)
+    # app.run()
+    app.run(host="0.0.0.0", port=5783)

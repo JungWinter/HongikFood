@@ -10,6 +10,37 @@
 - nginx + uwsgi
 - kakaotalk yellowid auto_reply
 
+## Overview
+```
+user request
+      |
+      v
+Flask main app -> APIManager <- UserSessionManager <- DepthChecker
+                      ^
+                      |
+                  MessageManager <- Message <- keyboard
+                                            <- menu <- Requester
+                                                    <- Parser
+                                                    -> Database
+```
+
+## Flow
+```
+오늘의 식단 - [요약된 식단 표시] - 전체 식단 보기
+                                 학생회관
+                                 남문관
+                                 신기숙사
+                                 제1기숙사
+                                 교직원
+내일의 식단 - 위와 같음
+이번주 식단 - [학교 홈페이지의 식단표 링크]
+식단 평가하기 - 학생회관 - 1, 2, 3, 4, 5
+               남문관
+               신기숙사
+               제1기숙사
+               교직원
+```
+
 ## TODO
 - [ ] Flask route -> Class 테스트
 - [ ] 서버에서 python3로 돌리기
