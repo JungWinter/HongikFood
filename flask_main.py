@@ -8,15 +8,11 @@ app = Flask(__name__)
 app.logger.addHandler(myLogger.handler)
 app.logger.setLevel(20)  # INFO Level
 
-APIAdmin = APIManager()
-MessageAdmin = MessageManager()
-UserSessionAdmin = UserSessionManager()
-ManuAdmin = MenuManager()
-
 
 @app.route("/api/keyboard", methods=["GET"])
 def y_keyboard():
-    return jsonify(ex_keyboard)
+    message = APIManager.getHomeMessage()
+    return jsonify(message)
 
 
 @app.route("/api/message", methods=["POST"])
@@ -61,4 +57,4 @@ def y_exit(key):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5783)
+    app.run(debug=True)
