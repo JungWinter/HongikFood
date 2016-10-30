@@ -1,13 +1,14 @@
-﻿  # -*- coding: utf-8 -*-
-import time
+# -*- coding: utf-8 -*-
 import requestModule
 import myLogger
+import time
 from flask import Flask
 from flask import request
 from flask import jsonify
 
 app = Flask(__name__)
 app.logger.addHandler(myLogger.handler)
+app.logger.setLevel(20)  # INFO Level
 
 ex_keyboard = {
     "type": "buttons",
@@ -91,7 +92,7 @@ def update():
         admin.updateData()
         ex_message[1]["message"]["text"] = admin.getMenu()
         ex_message[2]["message"]["text"] = admin.getMenu(1)
-        app.logger.warning(u"[Menu Data Update]")
+        app.logger.info(u"[Menu Data Update]")
 
 
 @app.route("/api/keyboard", methods=["GET"])
@@ -101,7 +102,7 @@ def y_keyboard():
 
 @app.route("/api/message", methods=["POST"])
 def y_message():
-    app.logger.warning(u"[message] user_key : {}, type : {}, content : {}".format(
+    app.logger.info(u"[message] user_key : {}, type : {}, content : {}".format(
         request.json["user_key"],
         request.json["type"],
         request.json["content"]))
@@ -124,19 +125,19 @@ def y_message():
 
 @app.route("/api/friend", methods=["POST"])
 def y_friend_add():
-    app.logger.warning(u"[JOIN] user_key : {}".format(request.json["user_key"]))
+    app.logger.info(u"[JOIN] user_key : {}".format(request.json["user_key"]))
     return jsonify(ex_success)
 
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def y_friend_block(key):
-    app.logger.warning(u"[BLOCK] user_key : {}".format(key))
+    app.logger.info(u"[BLOCK] user_key : {}".format(key))
     return jsonify(ex_success)
 
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def y_exit(key):
-    app.logger.warning(u"[EXIT] user_key : {}".format(key))
+    app.logger.info(u"[EXIT] user_key : {}".format(key))
     return jsonify(ex_success)
 
 

@@ -17,3 +17,7 @@ class MessageManager(mataclass=Singleton):
 
 class UserSessionManager(mataclass=Singleton):
     pass
+
+
+class MenuManager(mataclass=Singleton):
+    pass
