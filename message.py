@@ -5,21 +5,34 @@ class Message:
     #  Message클래스를 생성할 때 기본적인 틀만 구현하고
     #  값들은 던져주면 알아서 메시지를 리턴한다
 
-    ex_keyboard = {
+    baseKeyboard = {
         "type": "buttons",
         "buttons": Keyboard.buttons,
     }
 
-    ex_message = {
+    baseMessage = {
         "message": {
             "text": "",
         },
-        "keyboard": ex_keyboard
+        "keyboard": baseKeyboard
     }
-    # Uesage : ex_message["message"].update(ex_weekend)
-    ex_weekend = {
+    # Uesage : baseMessage["message"].update(baseWeekend)
+    baseWeekend = {
         "message_button": {
             "label": "이번주 메뉴 보기",
             "url": "http://apps.hongik.ac.kr/food/food.php"
         }
     }
+
+    def __init__(self):
+        self.returnedMessage = None
+
+    def getMessage(self):
+        return self.returnedMessage
+
+
+class HomeMessage(Message):
+    def __init__(self):
+        self.returnedMessage = Message.baseKeyboard
+        homeKeyboard = Keyboard.homeButtons
+        self.returnedMessage["buttons"] = homeKeyboard

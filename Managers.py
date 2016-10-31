@@ -1,5 +1,4 @@
-from message import Message
-from keyboard import Keyboard
+from message import HomeMessage
 
 
 class Singleton(type):
@@ -12,9 +11,10 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
-    @staticmethod
-    def getHomeMessage():
-        return MessageAdmin.getHomeMessage()
+    def process(self, mode, json=None):
+        if mode is "home":
+            message = MessageAdmin.getHomeMessageObject()
+            return message
 
 
 class MessageManager(metaclass=Singleton):
@@ -22,11 +22,9 @@ class MessageManager(metaclass=Singleton):
     APIManager가 MessageManager한테 메시지를 요청한다.
     MessageManager는 Message와 Keyboard를 조합해 리턴한다.
     '''
-    @staticmethod
-    def getHomeMessage():
-        homeKeyboard = Keyboard.homeButtons
-        homeMessage = Message.ex_keyboard
-        homeMessage["buttons"] = homeKeyboard
+
+    def getHomeMessageObject(self):
+        homeMessage = HomeMessage()
         return homeMessage
 
 
@@ -37,7 +35,7 @@ class UserSessionManager(metaclass=Singleton):
 class MenuManager(metaclass=Singleton):
     pass
 
-APIAdmin = APIManager()
+
 MessageAdmin = MessageManager()
 UserSessionAdmin = UserSessionManager()
 ManuAdmin = MenuManager()
@@ -46,3 +44,5 @@ if __name__ == "__main__":
     a = APIManager()
     b = APIManager()
     assert a is b
+    c = a.process("home").getMessage()
+    print(c)

@@ -8,15 +8,17 @@ app = Flask(__name__)
 app.logger.addHandler(myLogger.handler)
 app.logger.setLevel(20)  # INFO Level
 
+APIAdmin = APIManager()
+
 
 @app.route("/api/keyboard", methods=["GET"])
-def y_keyboard():
-    message = APIManager.getHomeMessage()
-    return jsonify(message)
+def yellowKeyboard():
+    message = APIAdmin.process("home").getMessage()
+    return jsonify(message), 200
 
 
 @app.route("/api/message", methods=["POST"])
-def y_message():
+def yellowMessage():
     app.logger.info(u"[message] user_key : {}, type : {}, content : {}".format(
         request.json["user_key"],
         request.json["type"],
@@ -39,19 +41,19 @@ def y_message():
 
 
 @app.route("/api/friend", methods=["POST"])
-def y_friend_add():
+def yellowFriendAdd():
     app.logger.info(u"[JOIN] user_key : {}".format(request.json["user_key"]))
     return jsonify(ex_success)
 
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
-def y_friend_block(key):
+def yellowFriendBlock(key):
     app.logger.info(u"[BLOCK] user_key : {}".format(key))
     return jsonify(ex_success)
 
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
-def y_exit(key):
+def yellowExit(key):
     app.logger.info(u"[EXIT] user_key : {}".format(key))
     return jsonify(ex_success)
 
