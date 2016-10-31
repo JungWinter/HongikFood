@@ -36,3 +36,13 @@ class HomeMessage(Message):
         self.returnedMessage = Message.baseKeyboard
         homeKeyboard = Keyboard.homeButtons
         self.returnedMessage["buttons"] = homeKeyboard
+
+
+class FailMessage(Message):
+    def __init__(self):
+        self.returnedMessage = Message.baseMessage
+        message = "오류가 발생하였습니다."
+        keyboard = Message.baseKeyboard
+        keyboard["buttons"] = Keyboard.homeButtons
+        self.returnedMessage["message"]["text"] = message
+        self.returnedMessage["keyboard"] = keyboard

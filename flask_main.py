@@ -19,25 +19,14 @@ def yellowKeyboard():
 
 @app.route("/api/message", methods=["POST"])
 def yellowMessage():
-    app.logger.info(u"[message] user_key : {}, type : {}, content : {}".format(
+    # TODO : try-except로 에러 캐치하기
+    #        logging분리하기
+    app.logger.info("[message] user_key : {}, type : {}, content : {}".format(
         request.json["user_key"],
         request.json["type"],
         request.json["content"]))
-    try:
-        update()
-    except:
-        app.logger.error(u"[Menu Update Error]")
-        return jsonify(ex_fail)
-    index = 0
-    try:
-        for i in range(len(keyword)):
-            if request.json["content"].count(keyword[i]) > 0:
-                index = i+1
-                break
-    except:
-        app.logger.error(u"[Message Error]")
-        return jsonify(ex_fail)
-    return jsonify(ex_message[index])
+    message = APIAdmin.process("message", request.json).getMessage()
+    return jsonify(message), 200
 
 
 @app.route("/api/friend", methods=["POST"])
@@ -59,4 +48,5 @@ def yellowExit(key):
 
 
 if __name__ == "__main__":
+    app.secret_key = 'F0Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
     app.run(debug=True)
