@@ -1,4 +1,5 @@
 from message import HomeMessage, FailMessage, SuccessMessage
+from datetime import datetime, timedelta
 
 
 class Singleton(type):
@@ -11,6 +12,8 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
+    lastUpdate = datetime.now()
+
     def process(self, mode, data=None):
         if mode is "home":
             messageObj = MessageAdmin.getHomeMessageObject()
@@ -19,7 +22,13 @@ class APIManager(metaclass=Singleton):
             _user_key = data["user_key"]
             _type = data["type"]
             _content = data["content"]
-            # TODO 작업중
+        elif mode is "add":
+            messageObj = MessageAdmin.getSuccessMessageObject()
+            return messageObj
+        elif mode is "block":
+            pass
+        elif mode is "exit":
+            pass
         elif mode is "fail":
             messageObj = MessageAdmin.getFailMessageObject()
             return messageObj
@@ -37,6 +46,10 @@ class MessageManager(metaclass=Singleton):
     def getFailMessageObject(self):
         failMessage = FailMessage()
         return failMessage
+
+    def getSuccessMessageObject(self):
+        successMessage = SuccessMessage()
+        return SuccessMessage
 
 
 class UserSessionManager(metaclass=Singleton):

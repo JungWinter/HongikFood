@@ -2,18 +2,55 @@
 import time
 from managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from flask import Flask, request, jsonify, session
-from datetime import timedelta
-from myLogger import handler, log, setLogger
+from datetime import timedelta, datetime
+from myLogger import log, setLogger
 
 app = Flask(__name__)
+app.permanent_session_lifetime = timedelta(minutes=10)
 setLogger(app, 20)
+
+EXPIRE_LIMIT_SECONDS = 20
 APIAdmin = APIManager()
 
 
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=10)
+    sessionCheck()
+
+
+@app.route("/api/failtest", methods=["GET"])
+def failtest():
+    return processFail(), 400
+
+
+@app.route("/api/session", methods=["GET"])
+def sessiontest():
+    print(session)
+    return str(session), 200
+
+
+@app.route("/api/session/<value>", methods=["GET"])
+def sessioninputtest(value):
+    now = datetime.utcnow() + timedelta(hours=9)
+    now = int(now.timestamp())
+    session[value] = {
+        "time": now
+    }
+    print(session)
+    return str(session), 200
+
+
+def sessionCheck():
+    expireList = []
+    for item in session:
+        if not item.count("permanent"):
+            now = datetime.utcnow() + timedelta(hours=9)
+            now = now.timestamp()
+            if now - session[item]["time"] > EXPIRE_LIMIT_SECONDS:
+                expireList.append(item)
+    for item in expireList:
+        session.pop(item, None)
 
 
 def processFail():
@@ -22,14 +59,9 @@ def processFail():
     return jsonify(message)
 
 
-@app.route("/api/failtest", methods=["GET"])
-def failtest():
-    return processFail(), 400
-
-
 @app.route("/api/keyboard", methods=["GET"])
 def yellowKeyboard():
-    message = APIAdmin.process("home")
+    message = APIAdmin.process("home").getMessage()
     return jsonify(message), 200
 
 
@@ -38,7 +70,7 @@ def yellowMessage():
     # TODO : try-except로 에러 캐치하기
 
     try:
-        message = APIAdmin.process("message", request.json)
+        message = APIAdmin.process("message", request.json).getMessage()
         log(app, "message", request.json)
         raise
         return jsonify(message), 200
@@ -51,7 +83,7 @@ def yellowFriendAdd():
     # TODO : store user data to DB
 
     try:
-        message = APIAdmin.process("add", request.json)
+        message = APIAdmin.process("add", request.json).getMessage()
         log(app, "add", request.json)
         return jsonify(message), 200
     except:
@@ -63,7 +95,7 @@ def yellowFriendBlock(key):
     # TODO : delete user data to DB
 
     try:
-        message = APIAdmin.process("block", key)
+        message = APIAdmin.process("block", key).getMessage()
         log(app, "block", key)
         return jsonify(message), 200
     except:
@@ -75,7 +107,7 @@ def yellowExit(key):
     # TODO : expire user data to DB
 
     try:
-        message = APIAdmin.process("exit", key)
+        message = APIAdmin.process("exit", key).getMessage()
         log(app, "exit", key)
         return jsonify(message), 200
     except:
@@ -83,5 +115,5 @@ def yellowExit(key):
 
 
 if __name__ == "__main__":
-    app.secret_key = 'F0Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
+    app.secret_key = 'F1Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
     app.run(debug=True)

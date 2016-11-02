@@ -21,7 +21,7 @@ def setLogger(app, level):
 def log(app, mode, data=None):
     '''
     app.logger.info("[JOIN] user_key : {}".format(request.json["user_key"]))
-    
+
     app.logger.info("[BLOCK] user_key : {}".format(key))
 
     app.logger.info("[EXIT] user_key : {}".format(key))
@@ -33,3 +33,11 @@ def log(app, mode, data=None):
             data["user_key"],
             data["type"],
             data["content"]))
+    elif mode is "add":
+        app.logger.info("[join] user_key : {}".format(data["user_key"]))
+    elif mode is "block":
+        app.logger.info("[block] user_key : {}".format(key))
+    elif mode is "exit":
+        app.logger.info("[exit] user_key : {}".format(key))
+    elif mode is "fail":
+        app.logger.info("[fail] request process fail")
