@@ -46,3 +46,8 @@ class FailMessage(Message):
         keyboard["buttons"] = Keyboard.homeButtons
         self.returnedMessage["message"]["text"] = message
         self.returnedMessage["keyboard"] = keyboard
+
+
+class SuccessMessage(Message):
+    def __init__(self):
+        self.returnedMessage = "SUCCESS"

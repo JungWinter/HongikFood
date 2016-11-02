@@ -1,50 +1,85 @@
 # -*- coding: utf-8 -*-
 import time
-import myLogger
 from managers import APIManager, MessageManager, UserSessionManager, MenuManager
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
+from datetime import timedelta
+from myLogger import handler, log, setLogger
 
 app = Flask(__name__)
-app.logger.addHandler(myLogger.handler)
-app.logger.setLevel(20)  # INFO Level
-
+setLogger(app, 20)
 APIAdmin = APIManager()
+
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
+
+
+def processFail():
+    message = APIAdmin.process("fail").getMessage()
+    log(app, "fail")
+    return jsonify(message)
+
+
+@app.route("/api/failtest", methods=["GET"])
+def failtest():
+    return processFail(), 400
 
 
 @app.route("/api/keyboard", methods=["GET"])
 def yellowKeyboard():
-    message = APIAdmin.process("home").getMessage()
+    message = APIAdmin.process("home")
     return jsonify(message), 200
 
 
 @app.route("/api/message", methods=["POST"])
 def yellowMessage():
     # TODO : try-except로 에러 캐치하기
-    #        logging분리하기
-    app.logger.info("[message] user_key : {}, type : {}, content : {}".format(
-        request.json["user_key"],
-        request.json["type"],
-        request.json["content"]))
-    message = APIAdmin.process("message", request.json).getMessage()
-    return jsonify(message), 200
+
+    try:
+        message = APIAdmin.process("message", request.json)
+        log(app, "message", request.json)
+        raise
+        return jsonify(message), 200
+    except:
+        return processFail(), 400
 
 
 @app.route("/api/friend", methods=["POST"])
 def yellowFriendAdd():
-    app.logger.info(u"[JOIN] user_key : {}".format(request.json["user_key"]))
-    return jsonify(ex_success)
+    # TODO : store user data to DB
+
+    try:
+        message = APIAdmin.process("add", request.json)
+        log(app, "add", request.json)
+        return jsonify(message), 200
+    except:
+        return processFail(), 400
 
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def yellowFriendBlock(key):
-    app.logger.info(u"[BLOCK] user_key : {}".format(key))
-    return jsonify(ex_success)
+    # TODO : delete user data to DB
+
+    try:
+        message = APIAdmin.process("block", key)
+        log(app, "block", key)
+        return jsonify(message), 200
+    except:
+        return processFail(), 400
 
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def yellowExit(key):
-    app.logger.info(u"[EXIT] user_key : {}".format(key))
-    return jsonify(ex_success)
+    # TODO : expire user data to DB
+
+    try:
+        message = APIAdmin.process("exit", key)
+        log(app, "exit", key)
+        return jsonify(message), 200
+    except:
+        return processFail(), 400
 
 
 if __name__ == "__main__":

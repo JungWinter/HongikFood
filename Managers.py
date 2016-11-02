@@ -1,4 +1,4 @@
-from message import HomeMessage, FailMessage
+from message import HomeMessage, FailMessage, SuccessMessage
 
 
 class Singleton(type):
@@ -11,14 +11,14 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
-    def process(self, mode, json=None):
+    def process(self, mode, data=None):
         if mode is "home":
             messageObj = MessageAdmin.getHomeMessageObject()
             return messageObj
         elif mode is "message":
-            _user_key = json["user_key"]
-            _type = json["type"]
-            _content = json["content"]
+            _user_key = data["user_key"]
+            _type = data["type"]
+            _content = data["content"]
             # TODO 작업중
         elif mode is "fail":
             messageObj = MessageAdmin.getFailMessageObject()
@@ -40,7 +40,14 @@ class MessageManager(metaclass=Singleton):
 
 
 class UserSessionManager(metaclass=Singleton):
-    pass
+    def add(self):
+        pass
+
+    def blcok(self):
+        pass
+
+    def exit(self):
+        pass
 
 
 class MenuManager(metaclass=Singleton):
@@ -56,6 +63,4 @@ if __name__ == "__main__":
     b = APIManager()
     assert a is b
     c = a.process("home").getMessage()
-    print(c)
     d = a.process("fail").getMessage()
-    print(d)
