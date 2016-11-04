@@ -11,6 +11,7 @@
 - kakaotalk yellowid auto_reply
 
 ## Overview
+@ TODO : UML로 만든 이미지 적용
 ```
 user request
       |
@@ -48,6 +49,7 @@ Flask main app -> APIManager <- UserSessionManager <- DepthChecker
   - 고유함
 - [x] Message클래스 구성하기
 - [x] User Session 관리기능 만들기
+- [ ] SessionCheck 효율 높이기
 - [ ] DB모델 만들기
 - [ ] 비동기IO 적용하기
 - [ ] Flask-RESTful 적용하기
