@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
 from managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from managers import timedelta, datetime
 from flask import Flask, request, jsonify, session
