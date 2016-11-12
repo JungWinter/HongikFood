@@ -1,22 +1,17 @@
 # -*- coding: utf-8 -*-
 from managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from managers import timedelta, datetime
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from myLogger import log, setLogger
+from collections import defaultdict
 
 app = Flask(__name__)
-app.permanent_session_lifetime = timedelta(minutes=10)
+# app.permanent_session_lifetime = timedelta(seconds=20)
 setLogger(app, 20)
 
 EXPIRE_LIMIT_SECONDS = 20
 APIAdmin = APIManager()
-
-
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
-    sessionCheck()
-
+session = defaultdict()
 
 @app.route("/api/failtest", methods=["GET"])
 def failtest():
@@ -41,15 +36,21 @@ def sessioninputtest(value):
 
 
 def sessionCheck():
+    now = datetime.utcnow() + timedelta(hours=9)
+    now = now.timestamp()
+
+    # type 1
     expireList = []
-    for item in session:
-        if not item.count("permanent"):
-            now = datetime.utcnow() + timedelta(hours=9)
-            now = now.timestamp()
-            if now - session[item]["time"] > EXPIRE_LIMIT_SECONDS:
-                expireList.append(item)
+    for key in session:
+        if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
+            expireList.append(item)
     for item in expireList:
         session.pop(item, None)
+
+    # type 2
+    for key in session.keys():
+        if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
+            del session[key]
 
 
 def processFail():
