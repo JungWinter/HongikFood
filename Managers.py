@@ -26,7 +26,8 @@ class APIManager(metaclass=Singleton):
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "block":
-            pass
+            messageObj = MessageAdmin.getSuccessMessageObject()
+            return messageObj
         elif mode is "exit":
             pass
         elif mode is "fail":
@@ -49,7 +50,7 @@ class MessageManager(metaclass=Singleton):
 
     def getSuccessMessageObject(self):
         successMessage = SuccessMessage()
-        return SuccessMessage
+        return successMessage
 
 
 class UserSessionManager(metaclass=Singleton):

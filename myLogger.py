@@ -36,8 +36,8 @@ def log(app, mode, data=None):
     elif mode is "add":
         app.logger.info("[join] user_key : {}".format(data["user_key"]))
     elif mode is "block":
-        app.logger.info("[block] user_key : {}".format(key))
+        app.logger.info("[block] user_key : {}".format(data))
     elif mode is "exit":
-        app.logger.info("[exit] user_key : {}".format(key))
+        app.logger.info("[exit] user_key : {}".format(data))
     elif mode is "fail":
         app.logger.info("[fail] request process fail")

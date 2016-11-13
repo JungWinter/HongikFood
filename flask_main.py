@@ -1,17 +1,43 @@
 # -*- coding: utf-8 -*-
+import sqlite3
 from managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from managers import timedelta, datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, _app_ctx_stack
 from myLogger import log, setLogger
 from collections import defaultdict
+from decorators import processtime
 
 app = Flask(__name__)
-# app.permanent_session_lifetime = timedelta(seconds=20)
-setLogger(app, 20)
-
+app.secret_key = 'F1Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
+DATABASE = "database.db"
 EXPIRE_LIMIT_SECONDS = 20
+
+setLogger(app, 20)
 APIAdmin = APIManager()
-session = defaultdict()
+userSession = defaultdict()
+
+
+def getDB():
+    top = _app_ctx_stack.top
+    if not hasattr(top, "sqliteDB"):
+        top.sqliteDB = sqlite3.connect(DATABASE)
+    return top.sqliteDB
+
+
+def initDB():
+    with app.app_context():
+        db = getDB()
+        with app.open_resource("schema.sql", mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+
+
+@app.teardown_appcontext
+def closeConnection(exception):
+    top = _app_ctx_stack.top
+    if hasattr(top, "sqliteDB"):
+        top.sqliteDB.close()
+
 
 @app.route("/api/failtest", methods=["GET"])
 def failtest():
@@ -20,37 +46,30 @@ def failtest():
 
 @app.route("/api/session", methods=["GET"])
 def sessiontest():
-    print(session)
-    return str(session), 200
+    print(userSession)
+    return str(userSession), 200
 
 
 @app.route("/api/session/<value>", methods=["GET"])
 def sessioninputtest(value):
     now = datetime.utcnow() + timedelta(hours=9)
     now = int(now.timestamp())
-    session[value] = {
-        "time": now
+    userSession[value] = {
+        "time": now,
+        "act": "test",
     }
-    print(session)
-    return str(session), 200
+    print(userSession)
+    return str(userSession), 200
 
 
+@processtime
 def sessionCheck():
     now = datetime.utcnow() + timedelta(hours=9)
     now = now.timestamp()
 
-    # type 1
-    expireList = []
-    for key in session:
-        if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
-            expireList.append(item)
-    for item in expireList:
-        session.pop(item, None)
-
-    # type 2
-    for key in session.keys():
-        if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
-            del session[key]
+    for key in list(userSession):
+        if now - userSession[key]["time"] > EXPIRE_LIMIT_SECONDS:
+            del userSession[key]
 
 
 def processFail():
@@ -80,8 +99,10 @@ def yellowMessage():
 
 @app.route("/api/friend", methods=["POST"])
 def yellowFriendAdd():
-    # TODO : store user data to DB
-
+    with app.app_context():
+        db = getDB()
+        db.cursor().execute("insert into users (user_key) values (?)", [request.json["user_key"]])
+        db.commit()
     try:
         message = APIAdmin.process("add", request.json).getMessage()
         log(app, "add", request.json)
@@ -92,8 +113,10 @@ def yellowFriendAdd():
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def yellowFriendBlock(key):
-    # TODO : delete user data to DB
-
+    with app.app_context():
+        db = getDB()
+        db.cursor().execute("delete from users where user_key = (?)", [key])
+        db.commit()
     try:
         message = APIAdmin.process("block", key).getMessage()
         log(app, "block", key)
@@ -104,7 +127,7 @@ def yellowFriendBlock(key):
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def yellowExit(key):
-    # TODO : expire user data to DB
+    # TODO : expire user session
 
     try:
         message = APIAdmin.process("exit", key).getMessage()
@@ -115,5 +138,5 @@ def yellowExit(key):
 
 
 if __name__ == "__main__":
-    app.secret_key = 'F1Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
+    initDB()
     app.run(debug=True)
