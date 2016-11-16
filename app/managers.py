@@ -1,4 +1,4 @@
-from message import HomeMessage, FailMessage, SuccessMessage
+from .message import HomeMessage, FailMessage, SuccessMessage
 from datetime import datetime, timedelta
 
 
