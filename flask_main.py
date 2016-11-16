@@ -6,9 +6,11 @@ from flask import Flask, request, jsonify, _app_ctx_stack
 from myLogger import log, setLogger
 from collections import defaultdict
 from decorators import processtime
+from os import urandom
+
 
 app = Flask(__name__)
-app.secret_key = 'F1Zr!8j/3y5 R~Xnn!jm?]LWX/,?RZ'
+app.secret_key = urandom(30)
 DATABASE = "database.db"
 EXPIRE_LIMIT_SECONDS = 20
 
