@@ -1,44 +1,17 @@
 # -*- coding: utf-8 -*-
-import sqlite3
-from managers import APIManager, MessageManager, UserSessionManager, MenuManager
-from managers import timedelta, datetime
-from flask import Flask, request, jsonify, _app_ctx_stack
-from myLogger import log, setLogger
+from app import app, db
+from flask import request, jsonify
 from collections import defaultdict
-from decorators import processtime
-from os import urandom
+from datetime import timedelta, datetime
+from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
+from .myLogger import log
+from .decorators import processtime
 
 
-app = Flask(__name__)
-app.secret_key = urandom(30)
-DATABASE = "database.db"
 EXPIRE_LIMIT_SECONDS = 20
 
-setLogger(app, 20)
 APIAdmin = APIManager()
 userSession = defaultdict()
-
-
-def getDB():
-    top = _app_ctx_stack.top
-    if not hasattr(top, "sqliteDB"):
-        top.sqliteDB = sqlite3.connect(DATABASE)
-    return top.sqliteDB
-
-
-def initDB():
-    with app.app_context():
-        db = getDB()
-        with app.open_resource("schema.sql", mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-
-@app.teardown_appcontext
-def closeConnection(exception):
-    top = _app_ctx_stack.top
-    if hasattr(top, "sqliteDB"):
-        top.sqliteDB.close()
 
 
 @app.route("/api/failtest", methods=["GET"])
@@ -101,10 +74,6 @@ def yellowMessage():
 
 @app.route("/api/friend", methods=["POST"])
 def yellowFriendAdd():
-    with app.app_context():
-        db = getDB()
-        db.cursor().execute("insert into users (user_key) values (?)", [request.json["user_key"]])
-        db.commit()
     try:
         message = APIAdmin.process("add", request.json).getMessage()
         log(app, "add", request.json)
@@ -115,10 +84,6 @@ def yellowFriendAdd():
 
 @app.route("/api/friend/<key>", methods=["DELETE"])
 def yellowFriendBlock(key):
-    with app.app_context():
-        db = getDB()
-        db.cursor().execute("delete from users where user_key = (?)", [key])
-        db.commit()
     try:
         message = APIAdmin.process("block", key).getMessage()
         log(app, "block", key)
@@ -137,8 +102,3 @@ def yellowExit(key):
         return jsonify(message), 200
     except:
         return processFail(), 400
-
-
-if __name__ == "__main__":
-    initDB()
-    app.run(debug=True)

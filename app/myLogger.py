@@ -3,7 +3,7 @@ from logging import Formatter
 
 
 handler = RotatingFileHandler(
-    "HongikFood.log",
+    "./app/log/HongikFood.log",
     maxBytes=1000000,
     backupCount=10,
     encoding="utf-8"
@@ -15,7 +15,7 @@ handler.setFormatter(Formatter(
 
 def setLogger(app, level):
     app.logger.addHandler(handler)
-    app.logger.setLevel(level)  # INFO Level
+    app.logger.setLevel(level)
 
 
 def log(app, mode, data=None):

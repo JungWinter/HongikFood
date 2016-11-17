@@ -1,5 +1,4 @@
-from message import HomeMessage, FailMessage, SuccessMessage
-from datetime import datetime, timedelta
+from .message import HomeMessage, FailMessage, SuccessMessage
 
 
 class Singleton(type):
@@ -12,7 +11,7 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
-    lastUpdate = datetime.now()
+    # lastUpdate = datetime.now()
 
     def process(self, mode, data=None):
         if mode is "home":
