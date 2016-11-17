@@ -1,4 +1,7 @@
+from app import db, session
 from .message import HomeMessage, FailMessage, SuccessMessage
+from .models import User, Poll
+from .myLogger import managerLog
 
 
 class Singleton(type):
@@ -18,17 +21,47 @@ class APIManager(metaclass=Singleton):
             messageObj = MessageAdmin.getHomeMessageObject()
             return messageObj
         elif mode is "message":
+            '''
+            타입체크 -> content체크 -> 세션체크 -> 명령처리
+            '''
             _user_key = data["user_key"]
             _type = data["type"]
             _content = data["content"]
         elif mode is "add":
+            '''
+            새로운 유저 등록
+            '''
+            user_key = data["user_key"]
+            u = User(user_key)
+            db.session.add(u)
+            db.session.commit()
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "block":
+            '''
+            기존 유저 삭제
+            '''
+            user_key = data
+            if session.get(user_key) is not None:
+                session.pop(user_key)
+            u = User.query.filter_by(user_key=user_key).first()
+            db.session.delete(u)
+            db.session.commit()
+            managerLog(mode, user_key)
+
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "exit":
-            pass
+            '''
+            세션 정보 삭제
+            '''
+            user_key = data
+            if session.get(user_key) is not None:
+                session.pop(user_key)
+            managerLog(mode, user_key)
+
+            messageObj = MessageAdmin.getSuccessMessageObject()
+            return messageObj
         elif mode is "fail":
             messageObj = MessageAdmin.getFailMessageObject()
             return messageObj
@@ -70,10 +103,3 @@ class MenuManager(metaclass=Singleton):
 MessageAdmin = MessageManager()
 UserSessionAdmin = UserSessionManager()
 ManuAdmin = MenuManager()
-
-if __name__ == "__main__":
-    a = APIManager()
-    b = APIManager()
-    assert a is b
-    c = a.process("home").getMessage()
-    d = a.process("fail").getMessage()
