@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
-from app import app
-from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
-from .managers import timedelta, datetime
+from app import app, db
 from flask import request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from .myLogger import log
 from collections import defaultdict
+from datetime import timedelta, datetime
+from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
+from .myLogger import log
 from .decorators import processtime
 
-# app = Flask(__name__)
-# app.config.update(
-#     DEBUG=True,
-#     TESTING=True,
-#     SQLALCHEMY_DATABASE_URI='sqlite:///' + path.join(basedir, 'test.db'),
-#     SQLALCHEMY_ECHO=True,
-#     SECRET_KEY=urandom(30)
-# )
+
 EXPIRE_LIMIT_SECONDS = 20
 
 APIAdmin = APIManager()
