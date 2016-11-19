@@ -37,7 +37,7 @@ def sessioninputtest(value):
 @processtime
 def sessionCheck():
     now = datetime.utcnow() + timedelta(hours=9)
-    now = now.timestamp()
+    now = int(now.timestamp())
 
     for key in list(session):
         if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
@@ -58,12 +58,9 @@ def yellowKeyboard():
 
 @app.route("/api/message", methods=["POST"])
 def yellowMessage():
-    # TODO : try-except로 에러 캐치하기
-
     try:
         viewLog("message", request.json)
         message = APIAdmin.process("message", request.json).getMessage()
-        raise
         return jsonify(message), 200
     except:
         return processFail(), 400
@@ -91,8 +88,6 @@ def yellowFriendBlock(key):
 
 @app.route("/api/chat_room/<key>", methods=["DELETE"])
 def yellowExit(key):
-    # TODO : expire user session
-
     try:
         viewLog("exit", key)
         message = APIAdmin.process("exit", key).getMessage()

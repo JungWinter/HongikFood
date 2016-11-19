@@ -35,31 +35,36 @@ class APIManager(metaclass=Singleton):
             u = User(user_key)
             db.session.add(u)
             db.session.commit()
+
+            managerLog(mode, user_key)
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "block":
             '''
+            유효성 검사
             기존 유저 삭제
             '''
             user_key = data
             if session.get(user_key) is not None:
                 session.pop(user_key)
             u = User.query.filter_by(user_key=user_key).first()
-            db.session.delete(u)
-            db.session.commit()
-            managerLog(mode, user_key)
+            if u is not None:
+                db.session.delete(u)
+                db.session.commit()
 
+            managerLog(mode, user_key)
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "exit":
             '''
+            유효성 검사
             세션 정보 삭제
             '''
             user_key = data
             if session.get(user_key) is not None:
                 session.pop(user_key)
-            managerLog(mode, user_key)
 
+            managerLog(mode, user_key)
             messageObj = MessageAdmin.getSuccessMessageObject()
             return messageObj
         elif mode is "fail":

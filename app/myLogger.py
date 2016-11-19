@@ -20,9 +20,11 @@ def setLogger(app, level):
 
 
 def managerLog(mode, user_key):
-    if mode is "exit":
+    if mode is "add":
+        app.logger.info("[add] {} add processing completed".format(user_key))
+    elif mode is "exit":
         app.logger.info("[exit] {} exit processing completed".format(user_key))
-    elif mdoe is "block":
+    elif mode is "block":
         app.logger.info("[block] {} block processing completed".format(user_key))
 
 
