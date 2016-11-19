@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from .myLogger import setLogger
+from collections import defaultdict
 
 
 app = Flask(__name__)
 app.config.from_pyfile("config.py")
-setLogger(app, 20)  # INFO Level
 db = SQLAlchemy(app)
+session = defaultdict()
 
-from app import views, models
+from app import views, models, myLogger
+
+myLogger.setLogger(app, 20)

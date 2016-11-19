@@ -1,5 +1,6 @@
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
+from app import app
 
 
 handler = RotatingFileHandler(
@@ -18,15 +19,22 @@ def setLogger(app, level):
     app.logger.setLevel(level)
 
 
-def log(app, mode, data=None):
+def managerLog(mode, user_key):
+    if mode is "add":
+        app.logger.info("[add] {} add processing completed".format(user_key))
+    elif mode is "exit":
+        app.logger.info("[exit] {} exit processing completed".format(user_key))
+    elif mode is "block":
+        app.logger.info("[block] {} block processing completed".format(user_key))
+
+
+def viewLog(mode, data=None):
     '''
-    app.logger.info("[JOIN] user_key : {}".format(request.json["user_key"]))
-
-    app.logger.info("[BLOCK] user_key : {}".format(key))
-
-    app.logger.info("[EXIT] user_key : {}".format(key))
-
-    fail일때
+    전달된 mode에 따라 로깅 내용이 달라진다.
+    message : 유저키, 타입, 내용을 기록한다. json형태의 data
+    add : 유저키를 기록한다. json형태의 data
+    block, exit : 유저키를 기록한다. string형태의 data
+    fail : 기본 request 처리 실패 로그
     '''
     if mode is "message":
         app.logger.info("[message] user_key : {}, type : {}, content : {}".format(
