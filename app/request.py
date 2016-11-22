@@ -1,34 +1,8 @@
 # -*- coding: utf-8 -*-
 import requests
 import re
-import time
 from bs4 import BeautifulSoup
 
-
-class Weekend():
-    def __init__(self, text):
-        self.day = text
-        self.date = ""
-        self.data = {
-            u"학관": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"남문관": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"교직원": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"신기숙사": {
-                u"아침": "",
-                u"점심": "",
-                u"저녁": ""
-            }
-        }
-# 접근 : mon.data["학관"]["점심"]
 
 def step01():
     '''
