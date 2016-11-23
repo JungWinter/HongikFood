@@ -35,3 +35,32 @@ class Poll(db.Model):
 
     def __repr__(self):
         return "<Poll %r>" % (self.place+"-"+self.time+"-"+str(self.score))
+
+
+class PlaceMenu():
+    def __init__(self):
+        self.title = None  # date + place
+        self.date = None
+        self.items = []
+        self.place = None
+        self.info = None
+
+    def summarize(self):
+        message = ""
+        message += "<<" + self.place + ">>\n"
+        for item in itmes:  # item is dict type
+            k = list(item)[0]  # use only first element
+            v = item[k]
+            message += "===" + k + "===\n"
+            for line in v.split()[:4]:
+                message += line.strip() + "\n"
+            message += "\n"
+        return message
+
+
+class DayMenu():
+    def __init__(self):
+        self.title = None  # date + dayname
+        self.date = None
+        self.items = []
+        self.dayname = None

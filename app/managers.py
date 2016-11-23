@@ -24,9 +24,21 @@ class APIManager(metaclass=Singleton):
             '''
             타입체크 -> content체크 -> 세션체크 -> 명령처리
             '''
-            _user_key = data["user_key"]
-            _type = data["type"]
-            _content = data["content"]
+            user_key = data["user_key"]
+            request_type = data["type"]
+            content = data["content"]
+
+            '''
+            step1에 속하면 session에 유저 키를 등록
+            step2에 속하면 그 전 문맥이 무엇이었는지 파악 필요
+            step2에 속하고 식단 평가가 아니면 세션 만료
+            step3에 속하면 place정보 파악 필요
+            step4에 속하면 place, when정보 파악 필요
+            '''
+            step1 = ["오늘의 식단", "내일의 식단", "이번주 식단", "식단 평가하기"]
+            step2 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
+            step3 = ["아침", "점심", "저녁"]
+            step4 = ["1", "2", "3", "4", "5"]
         elif mode is "add":
             '''
             새로운 유저 등록
