@@ -6,4 +6,4 @@ python:
 install:
   - pip install -r requirement.txt
 
-script: test/test_test.py
+script: test/
