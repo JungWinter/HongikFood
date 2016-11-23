@@ -6,6 +6,12 @@ from bs4 import BeautifulSoup
 
 def step01():
     '''
+    레거시 코드 걷어내고 구조화 안한 상태
+    크게 구분하면
+        soup객체 얻어오기
+        re검사로 wday와 date 얻어오기 -> 동적
+        subtitle로 장소 / 정보 얻어오기 -> 정적
+        menu로 식단 얻어오기 -> 동적
     '''
     r = requests.get("http://apps.hongik.ac.kr/food/food.php")
     soup = BeautifulSoup(r.text, "lxml")
@@ -13,7 +19,7 @@ def step01():
     head = str(soup.find("thead"))
     head = "".join(head.split("\n"))
     pattern = re.compile(r"([가-힣]{3}).+?(\d{4}[.]\d{2}[.]\d{2})")
-    result = pattern.findall(head)
+    result = pattern.findall(head)  # [("월요일", "2016.11.21"), ...]
     for k, v in result:
         pass
         '''
@@ -26,127 +32,22 @@ def step01():
     for item in subtitles:
         subtitle = item.get_text().strip()
         '''
-        subtitle은 학생회관 남문과은 장소 / 시간등의 정보
+        subtitle은 학생회관 남문관은 장소 / 시간등의 정보
         그 외는 그냥 장소 로만 되어있음
+        example :
+            학생회관식당 / 11:00~14:00(점심), 17:00~19:00(저녁) (토요일 휴업)
+            남문관식당(제2식당) /  11:00~15:00(점심), 16:30~18:30(저녁) (토요일 휴업)
+            교직원식당
         Menu클래스에게 던져주면 알아서 판단하게끔
         '''
 
-
-class Manager():
-    def __init__(self):
-        mon = Weekend(u"월요일")
-        tue = Weekend(u"화요일")
-        wen = Weekend(u"수요일")
-        thu = Weekend(u"목요일")
-        fri = Weekend(u"금요일")
-        sat = Weekend(u"토요일")
-        self.weekends = [mon, tue, wen, thu, fri, sat]
-        self.titles = []
-        self.setDate()
-        self.setMenu()
-        self.lastUpdate = time.time()
-
-
-    def setDate(self):
-        result = self.getDate()
-        for i in range(len(self.weekends)):
-            self.weekends[i].date = result[i][1]
-
-    def setMenu(self):
-        soup = self.getHtml()
-        for word in soup.find_all("tr", class_="subtitle"):
-            self.titles.append(word.get_text().lstrip().rstrip())
-        count = 0
-        for word in soup.find_all("div", class_="daily-menu"):
-            menu = word.get_text().lstrip().rstrip()
-            if count < 6:
-                self.weekends[count].data[u"학관"][u"점심"] = menu
-            elif count < 12:
-                self.weekends[count % 6].data[u"학관"][u"저녁"] = menu
-            elif count < 18:
-                self.weekends[count % 6].data[u"남문관"][u"점심"] = menu
-            elif count < 24:
-                self.weekends[count % 6].data[u"남문관"][u"저녁"] = menu
-            elif count < 30:
-                self.weekends[count % 6].data[u"교직원"][u"점심"] = menu
-            elif count < 36:
-                self.weekends[count % 6].data[u"교직원"][u"저녁"] = menu
-            elif count < 42:
-                self.weekends[count % 6].data[u"신기숙사"][u"아침"] = menu
-            elif count < 48:
-                self.weekends[count % 6].data[u"신기숙사"][u"점심"] = menu
-            elif count < 54:
-                self.weekends[count % 6].data[u"신기숙사"][u"저녁"] = menu
-            count += 1
-        # print(soup.find("div",class_="daily-menu").get_text())
-
-    def getMenu(self, mode=0):
-        # mode : 0 = today, 1 = tomorrow
-        wday = time.localtime()[6]  # wday : 0 = monday
-        message = ""
-        if (mode == 0 and wday == 6) or (mode == 1 and wday == 5):
-            message = u"메뉴 정보가 없습니다"
-            return message
-        if mode == 1:
-            wday = (wday + 1) % 7
-
-        message = ""
-        message += self.weekends[wday].date + " " + self.weekends[wday].day + "\n\n"
-        message += "<<" + self.titles[0] + ">>\n"
-        message += u"===점심 (3,900원)===\n"
-        message += self.weekends[wday].data[u"학관"][u"점심"] + "\n\n"
-        message += u"===저녁 (3,900원)===\n"
-        message += self.weekends[wday].data[u"학관"][u"저녁"] + "\n\n"
-        # message += u"===옛향 (저녁)===\n"
-        # message += self.weekends[wday].data[u"학관"][u"저녁"] + "\n\n"
-        message += "<<" + self.titles[1] + ">>\n"
-        message += u"===점심 (3,500원)===\n"
-        message += self.weekends[wday].data[u"남문관"][u"점심"] + "\n\n"
-        message += u"===저녁 (3,500원)===\n"
-        message += self.weekends[wday].data[u"남문관"][u"저녁"] + "\n\n"
-        message += "<<" + self.titles[2] + ">>\n"
-        message += u"===점심===\n"
-        message += self.weekends[wday].data[u"교직원"][u"점심"] + "\n\n"
-        message += u"===저녁===\n"
-        message += self.weekends[wday].data[u"교직원"][u"저녁"] + "\n\n"
-        message += "<<" + self.titles[3] + ">>\n"
-        message += u"===아침 (7:30~9:00)===\n"
-        message += self.weekends[wday].data[u"신기숙사"][u"아침"] + "\n\n"
-        message += u"===점심 (11:30~14:30)===\n"
-        message += self.weekends[wday].data[u"신기숙사"][u"점심"] + "\n\n"
-        message += u"===저녁 (17:30~19:30)===\n"
-        message += self.weekends[wday].data[u"신기숙사"][u"저녁"] + "\n\n"
-
-        return message
-
-    def updateData(self):
-        self.dataReset()
-        self.setDate()
-        self.setMenu()
-        self.lastUpdate = time.time()
-
-    def dataReset(self):
-        self.date = ""
-        self.data = {
-            u"학관": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"남문관": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"교직원": {
-                u"점심": "",
-                u"저녁": ""
-            },
-            u"신기숙사": {
-                u"아침": "",
-                u"점심": "",
-                u"저녁": ""
-            }
-        }
-
-if __name__ == "__main__":
-    admin = Manager()
-    print(admin.getMenu(1))
+    menus = soup.find_all("div", class_="daily-menu")
+    for item in menus:
+        menuList = item.get_text().split()
+        '''
+        menus는 횡적으로 구성되어있음.
+        월요일에 대한 학생회관 점심, 저녁 / 남문관 점심 , 저녁 이렇게가 아니라
+        월화수목금토에 대한 학생회관 점심, 월화수목금토에 대한 학생회관 저녁 이렇게
+        총 54개 (하루에 9개 * 6일)
+        6개씩 건너뛰며 횡적 배열을 종적 배열로 바꿔줘야함
+        '''
