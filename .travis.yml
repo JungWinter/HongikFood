@@ -6,4 +6,5 @@ python:
 install:
   - pip install -r requirement.txt
 
-script: test/
+script:
+  - pytest app/test/
