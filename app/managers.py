@@ -1,4 +1,5 @@
 from app import db, session
+from datetime import timedelta, datetime
 from .message import HomeMessage, FailMessage, SuccessMessage
 from .models import User, Poll
 from .myLogger import managerLog
@@ -33,12 +34,30 @@ class APIManager(metaclass=Singleton):
             step2에 속하면 그 전 문맥이 무엇이었는지 파악 필요
             step2에 속하고 식단 평가가 아니면 세션 만료
             step3에 속하면 place정보 파악 필요
-            step4에 속하면 place, when정보 파악 필요
+            step4에 속하면 place, when정보 파악 필요, 세션 만료
             '''
             step1 = ["오늘의 식단", "내일의 식단", "이번주 식단", "식단 평가하기"]
             step2 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
             step3 = ["아침", "점심", "저녁"]
             step4 = ["1", "2", "3", "4", "5"]
+
+            if content in step1:
+                now = datetime.utcnow() + timedelta(hours=9)
+                now = int(now.timestamp())
+                session[user_key] = {
+                    "time": now,
+                    "history": [content]
+                }
+            elif content in step2:
+                pass
+            elif content in step3:
+                pass
+            elif content in step4:
+                '''
+                평가를 DB에 기록
+                '''
+                if user_key in session:
+                    del session[user_key]
         elif mode is "add":
             '''
             새로운 유저 등록
@@ -115,8 +134,3 @@ class UserSessionManager(metaclass=Singleton):
 
 class MenuManager(metaclass=Singleton):
     pass
-
-
-MessageAdmin = MessageManager()
-UserSessionAdmin = UserSessionManager()
-ManuAdmin = MenuManager()
