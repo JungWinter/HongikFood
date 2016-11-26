@@ -2,14 +2,17 @@
 from app import app, db, session
 from flask import request, jsonify
 from datetime import timedelta, datetime
-from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
+from .managers import APIAdmin, MessageAdmin, UserSessionAdmin, MenuAdmin
+# from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from .myLogger import viewLog
 from .decorators import processtime
 
 
 EXPIRE_LIMIT_SECONDS = 20
-APIAdmin = APIManager()
-
+# APIAdmin = APIManager()
+# MessageAdmin = MessageManager()
+# UserSessionAdmin = UserSessionManager()
+# MenuAdmin = MenuManager()
 
 @app.route("/api/failtest", methods=["GET"])
 def failtest():

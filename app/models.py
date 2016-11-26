@@ -59,8 +59,8 @@ class PlaceMenu():
 
 
 class DayMenu():
-    def __init__(self):
+    def __init__(self, dayname):
         self.title = None  # date + dayname
         self.date = None
         self.items = []
-        self.dayname = None
+        self.dayname = dayname

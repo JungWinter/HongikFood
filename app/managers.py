@@ -1,7 +1,7 @@
 from app import db, session
 from datetime import timedelta, datetime
 from .message import HomeMessage, FailMessage, SuccessMessage
-from .models import User, Poll
+from .models import User, Poll, PlaceMenu, DayMenu
 from .myLogger import managerLog
 
 
@@ -133,4 +133,43 @@ class UserSessionManager(metaclass=Singleton):
 
 
 class MenuManager(metaclass=Singleton):
-    pass
+    def __init__(self):
+        pass
+
+    def updateMenu(self):
+        mon = DayMenu("월요일")
+        tue = DayMenu("화요일")
+        wed = DayMenu("수요일")
+        thu = DayMenu("목요일")
+        fri = DayMenu("금요일")
+        sat = DayMenu("토요일")
+        weekend = [mon, tue, wed, thu, fri, sat]
+        for index, day in enumerate(weekend):
+            pass
+        '''
+        - request해서 얻어온 것들을 PlaceMenu와 DayMenu에 집어넣기
+            - date, subtitle, daily-menu
+        - 접근방식
+            mon = DayMenu()
+            mon.place["학관"].update(...)
+            아니면
+            mon.update("학관", ...)
+            아니면
+            mon.place("학관").update(...)
+
+            mon.place["학관"] is PlaceMenu
+            mon.place("학관").time("점심") is List
+        '''
+        pass
+
+    def returnTodayMenu(self):
+        pass
+
+    def returnTomorrowMenu(self):
+        pass
+
+
+APIAdmin = APIManager()
+MessageAdmin = MessageManager()
+UserSessionAdmin = UserSessionManager()
+MenuAdmin = MenuManager()
