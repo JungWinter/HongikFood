@@ -133,17 +133,18 @@ class UserSessionManager(metaclass=Singleton):
 
 
 class MenuManager(metaclass=Singleton):
+    mon = DayMenu("월요일")
+    tue = DayMenu("화요일")
+    wed = DayMenu("수요일")
+    thu = DayMenu("목요일")
+    fri = DayMenu("금요일")
+    sat = DayMenu("토요일")
+    weekend = [mon, tue, wed, thu, fri, sat]
+
     def __init__(self):
         pass
 
     def updateMenu(self):
-        mon = DayMenu("월요일")
-        tue = DayMenu("화요일")
-        wed = DayMenu("수요일")
-        thu = DayMenu("목요일")
-        fri = DayMenu("금요일")
-        sat = DayMenu("토요일")
-        weekend = [mon, tue, wed, thu, fri, sat]
         for index, day in enumerate(weekend):
             pass
         '''
