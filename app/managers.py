@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from .message import HomeMessage, FailMessage, SuccessMessage
 from .models import User, Poll, PlaceMenu, DayMenu
 from .myLogger import managerLog
+from .request import getDatesAndMenus
 
 
 class Singleton(type):
@@ -19,6 +20,7 @@ class APIManager(metaclass=Singleton):
 
     def process(self, mode, data=None):
         if mode is "home":
+            MenuAdmin.updateMenu()
             messageObj = MessageAdmin.getHomeMessageObject()
             return messageObj
         elif mode is "message":
@@ -133,35 +135,20 @@ class UserSessionManager(metaclass=Singleton):
 
 
 class MenuManager(metaclass=Singleton):
-    mon = DayMenu("월요일")
-    tue = DayMenu("화요일")
-    wed = DayMenu("수요일")
-    thu = DayMenu("목요일")
-    fri = DayMenu("금요일")
-    sat = DayMenu("토요일")
-    weekend = [mon, tue, wed, thu, fri, sat]
 
     def __init__(self):
-        pass
+        mon = DayMenu("월요일")
+        tue = DayMenu("화요일")
+        wed = DayMenu("수요일")
+        thu = DayMenu("목요일")
+        fri = DayMenu("금요일")
+        sat = DayMenu("토요일")
+        self.weekend = [mon, tue, wed, thu, fri, sat]
 
     def updateMenu(self):
-        for index, day in enumerate(weekend):
-            pass
-        '''
-        - request해서 얻어온 것들을 PlaceMenu와 DayMenu에 집어넣기
-            - date, subtitle, daily-menu
-        - 접근방식
-            mon = DayMenu()
-            mon.place["학관"].update(...)
-            아니면
-            mon.update("학관", ...)
-            아니면
-            mon.place("학관").update(...)
-
-            mon.place["학관"] is PlaceMenu
-            mon.place("학관").time("점심") is List
-        '''
-        pass
+        dates, menus = getDatesAndMenus()
+        for index, day in enumerate(self.weekend):
+            day.update(date=dates[index], menu=menus[index])
 
     def returnTodayMenu(self):
         pass
