@@ -19,6 +19,10 @@ def setLogger(app, level):
     app.logger.setLevel(level)
 
 
+def customLog(msg):
+    app.logger.info(msg)
+
+
 def managerLog(mode, user_key):
     app.logger.info("[{}] {} {} processing completed".format(mode, user_key, mode))
 
