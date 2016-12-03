@@ -57,6 +57,7 @@ class PlaceMenu():
             },
         }
         self.place = place
+        self.price = None
 
     def test(self):
         print("%s PlaceMenu TEST" % self.place)
@@ -71,15 +72,46 @@ class PlaceMenu():
         print("저녁 : %s" % " ".join(self.items["저녁"]["메뉴"]))
 
     def summarize(self):
+        '''
+        최종 메시지의 형태
+        2016.11.11 금요일
+        ■ 남문관 (3,500원)
+        □ 점심 (11:00-15:00)
+        수제탕수육
+        쌀밥
+        ...
+        □ 저녁 (16:30-18:30)
+        제육볶음
+        쌀밥
+        ...
+        '''
+        time = ["아침", "점심", "저녁"]
         message = ""
-        message += "<<" + self.place + ">>\n"
-        for item in itmes:  # item is dict type
-            k = list(item)[0]  # use only first element
-            v = item[k]
-            message += "===" + k + "===\n"
-            for line in v.split()[:4]:
-                message += line.strip() + "\n"
-            message += "\n"
+        message += "{} {}\n".format(self.date, self.dayname)
+        if self.price == "":
+            message += "■ {}\n".format(self.place)
+        else:
+            message += "■ {} ({})\n".format(self.place, self.price)
+
+        # 메뉴 정보가 아예 없으면
+        if not any([self.items[t]["메뉴"] for t in time]):
+            message += "식단 정보가 없습니다.\n"
+            return message
+
+        for key in time:
+            # 메뉴가 비어있으면 건너뛰기
+            if self.items[key]["메뉴"]:
+                if self.items[key]["정보"] == "":
+                    message += "□ {}\n".format(key)
+                else:
+                    message += "□ {} ({})\n".format(
+                        key,
+                        self.items[key]["정보"]
+                    )
+                # for menu in self.items[key]["메뉴"]:
+                #     message += "{:_>18}\n".format(menu)
+                message += "\n".join(self.items[key]["메뉴"]) + "\n"
+
         return message
 
     def updateDate(self, date):
@@ -113,23 +145,25 @@ class DayMenu():
         info = [
             # 학관 정보
             "",
-            "11:00-14:00\n3,900원",
-            "17:00-19:00\n3,900원",
+            "11:00-14:00",
+            "17:00-19:00",
             # 남문관 정보
             "",
-            "11:00-15:00\n3,500원",
-            "16:30-18:30\n3,500원",
+            "11:00-15:00",
+            "16:30-18:30",
             # 교직원 정보
             "",
-            "6,000원",
-            "6,000원",
+            "",
+            "",
             # 신기숙사 정보
             "7:30-9:00",
             "11:30-14:30",
             "17:30-19:30"
         ]
         time = ["아침", "점심", "저녁"]
+        price = ["3,900원", "3,500원", "6,000원", ""]
         for place in self.items:
+            place.price = price.pop(0)
             for t in time:
                 place.items[t]["정보"] = info.pop(0)
 
@@ -158,9 +192,3 @@ class DayMenu():
             for index, item in enumerate(self.items):
                 item.updateDate(date)
                 item.updateMenu(divMenu[index])
-            for item in self.items:
-                print("============================")
-                print(self.dayname, self.date)
-                item.test()
-        else:
-            print("삐빅")
