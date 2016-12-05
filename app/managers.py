@@ -25,7 +25,7 @@ class APIManager(metaclass=Singleton):
             return messageObj
         elif mode is "message":
             '''
-            타입체크 -> content체크 -> 세션체크 -> 명령처리
+            메뉴 업데이트 -> 타입체크 -> content체크 -> 세션체크 -> 명령처리
             '''
             user_key = data["user_key"]
             request_type = data["type"]
@@ -38,10 +38,11 @@ class APIManager(metaclass=Singleton):
             step3에 속하면 place정보 파악 필요
             step4에 속하면 place, when정보 파악 필요, 세션 만료
             '''
-            step1 = ["오늘의 식단", "내일의 식단", "이번주 식단", "식단 평가하기"]
+            step1 = ["오늘의 식단", "내일의 식단", "식단 평가하기"]
             step2 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
             step3 = ["아침", "점심", "저녁"]
             step4 = ["1", "2", "3", "4", "5"]
+            step5 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
 
             if content in step1:
                 now = datetime.utcnow() + timedelta(hours=9)
@@ -60,6 +61,14 @@ class APIManager(metaclass=Singleton):
                 '''
                 if user_key in session:
                     del session[user_key]
+            elif content in step5:
+
+                if user_key in session:
+                    del session[user_key]
+            elif content == "취소":
+                if user_key in session:
+                    del session[user_key]
+                # 메시지와 함께 홈키 반환
         elif mode is "add":
             '''
             새로운 유저 등록
@@ -135,7 +144,13 @@ class UserSessionManager(metaclass=Singleton):
 
 
 class MenuManager(metaclass=Singleton):
-
+    '''
+    Testcase:
+        오늘의 학생식당 식단
+        내일의 남문관 식단
+        오늘의 점심
+        내일의 전체메뉴 보기
+    '''
     def __init__(self):
         mon = DayMenu("월요일")
         tue = DayMenu("화요일")
@@ -154,6 +169,9 @@ class MenuManager(metaclass=Singleton):
         pass
 
     def returnTomorrowMenu(self):
+        pass
+
+    def returnLunch(self):
         pass
 
 
