@@ -74,7 +74,8 @@ class APIManager(metaclass=Singleton):
             elif content == "취소":
                 if user_key in session:
                     del session[user_key]
-                # 메시지와 함께 홈키 반환
+                messageObj = MessageAdmin.getCustomMessageObject("취소하셨습니다.")
+                return messageObj
         elif mode is "add":
             '''
             새로운 유저 등록
@@ -128,7 +129,7 @@ class MessageManager(metaclass=Singleton):
     def getCustomMessageObject(self, message):
         _message = BaseMessage()
         _message.updateMessage(message)
-        # _message.updateKeyboard(HomeMessage.returnHomeKeyboard)
+        _message.updateKeyboard(HomeMessage.returnHomeKeyboard())
         return _message
 
     def getSummaryMessageObject(self, isToday):

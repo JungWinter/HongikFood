@@ -62,7 +62,7 @@ class HomeMessage(Message):
         self.returnedMessage["buttons"] = homeKeyboard
 
     @staticmethod
-    def returnHomeKeyboard(self):
+    def returnHomeKeyboard():\
         return Keyboard.homeButtons
 
 
