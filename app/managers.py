@@ -1,8 +1,8 @@
 from app import db, session
 from datetime import timedelta, datetime
-from .message import HomeMessage, FailMessage, SuccessMessage
+from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage, SummaryMessage
 from .models import User, Poll, PlaceMenu, DayMenu
-from .myLogger import managerLog
+from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
 
 
@@ -51,6 +51,12 @@ class APIManager(metaclass=Singleton):
                     "time": now,
                     "history": [content]
                 }
+                if content == "오늘의 식단":
+                    isToday = True
+                elif content == "내일의 식단":
+                    isToday = False
+                messageObj = MessageAdmin.getSummaryMessageObject(isToday=isToday)
+                return messageObj
             elif content in step2:
                 pass
             elif content in step3:
@@ -119,6 +125,18 @@ class MessageManager(metaclass=Singleton):
     APIManager가 MessageManager한테 메시지를 요청한다.
     MessageManager는 Message와 Keyboard를 조합해 리턴한다.
     '''
+    def getCustomMessageObject(self, message):
+        _message = BaseMessage()
+        _message.updateMessage(message)
+        # _message.updateKeyboard(HomeMessage.returnHomeKeyboard)
+        return _message
+
+    def getSummaryMessageObject(self, isToday):
+        message = MenuAdmin.returnEveryWhereMenu(summary=True, isToday=isToday)
+        print(message)
+        summaryMessage = SummaryMessage(message, isToday)
+        return summaryMessage
+
     def getHomeMessageObject(self):
         homeMessage = HomeMessage()
         return homeMessage
@@ -161,11 +179,22 @@ class MenuManager(metaclass=Singleton):
         self.weekend = [mon, tue, wed, thu, fri, sat]
 
     def updateMenu(self):
+        '''
+        마지막 업데이트로부터 시간 얼마나 지났는지 여기서 체크
+        '''
         dates, menus = getDatesAndMenus()
         for index, day in enumerate(self.weekend):
             day.update(date=dates[index], menu=menus[index])
 
-    def returnTodayMenu(self):
+    def returnEveryWhereMenu(self, summary, isToday):
+        self.updateMenu()
+        wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
+        if not isToday:
+            wday = (wday + 1) % 7
+        message = self.weekend[wday-1].returnAllMenu(summary)
+        return message
+
+    def returnTodayMenu(self, summary):
         pass
 
     def returnTomorrowMenu(self):

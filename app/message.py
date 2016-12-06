@@ -31,21 +31,46 @@ class Message:
         return self.returnedMessage
 
 
+class BaseMessage(Message):
+    def __init__(self):
+        super().__init__()
+        self.returnedMessage = Message.baseMessage
+
+    def updateMessage(self, message):
+        self.returnedMessage["message"]["text"] = message
+
+    def updateKeyboard(self, argKeyboard):
+        keyboard = Message.baseKeyboard
+        keyboard["buttons"] = argKeyboard
+        self.returnedMessage["keyboard"] = keyboard
+
+
+class SummaryMessage(BaseMessage):
+    def __init__(self, message, isToday):
+        super().__init__()
+        self.updateMessage(message)
+        if isToday:
+            self.updateKeyboard(Keyboard.todayButtons)
+        else:
+            self.updateKeyboard(Keyboard.tomorrowButtons)
+
+
 class HomeMessage(Message):
     def __init__(self):
         self.returnedMessage = Message.baseKeyboard
-        homeKeyboard = Keyboard.homeButtons
+        homeKeyboard = HomeMessage.returnHomeKeyboard()
         self.returnedMessage["buttons"] = homeKeyboard
 
+    @staticmethod
+    def returnHomeKeyboard(self):
+        return Keyboard.homeButtons
 
-class FailMessage(Message):
+
+class FailMessage(BaseMessage):
     def __init__(self):
-        self.returnedMessage = Message.baseMessage
-        message = "오류가 발생하였습니다."
-        keyboard = Message.baseKeyboard
-        keyboard["buttons"] = Keyboard.homeButtons
-        self.returnedMessage["message"]["text"] = message
-        self.returnedMessage["keyboard"] = keyboard
+        super().__init__()
+        self.updateMessage("오류가 발생하였습니다.")
+        self.updateKeyboard(Keyboard.homeButtons)
 
 
 class SuccessMessage(Message):

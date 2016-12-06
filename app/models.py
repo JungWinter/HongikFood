@@ -91,7 +91,7 @@ class PlaceMenu():
         print("점심 : %s" % " ".join(self.items["점심"]["메뉴"]))
         print("저녁 : %s" % " ".join(self.items["저녁"]["메뉴"]))
 
-    def summarize(self):
+    def returnMenu(self, summary):
         '''
         최종 메시지의 형태
         2016.11.11 금요일
@@ -109,9 +109,9 @@ class PlaceMenu():
         message = ""
         message += "{} {}\n".format(self.date, self.dayname)
         if self.price == "":
-            message += "■ {}\n".format(self.place)
+            message += "□ {}\n".format(self.place)
         else:
-            message += "■ {} ({})\n".format(self.place, self.price)
+            message += "□ {} ({})\n".format(self.place, self.price)
 
         # 메뉴 정보가 아예 없으면
         if not any([self.items[t]["메뉴"] for t in time]):
@@ -122,15 +122,23 @@ class PlaceMenu():
             # 메뉴가 비어있으면 건너뛰기
             if self.items[key]["메뉴"]:
                 if self.items[key]["정보"] == "":
-                    message += "□ {}\n".format(key)
+                    message += "■ {}\n".format(key)
                 else:
-                    message += "□ {} ({})\n".format(
+                    message += "■ {} ({})\n".format(
                         key,
                         self.items[key]["정보"]
                     )
                 # for menu in self.items[key]["메뉴"]:
                 #     message += "{:_>18}\n".format(menu)
-                message += "\n".join(self.items[key]["메뉴"]) + "\n"
+                # 메뉴 붙여주기
+                if summary:
+                    # 쌀밥 제외
+                    menus = self.items[key]["메뉴"][:]
+                    if "쌀밥" in menus:
+                        menus.remove("쌀밥")
+                    message += "\n".join(menus[:4]) + "\n"
+                else:
+                    message += "\n".join(self.items[key]["메뉴"]) + "\n"
 
         return message
 
@@ -186,6 +194,12 @@ class DayMenu():
             place.price = price.pop(0)
             for t in time:
                 place.items[t]["정보"] = info.pop(0)
+
+    def returnAllMenu(self, summary):
+        message = ""
+        for place in self.items:
+            message += place.returnMenu(summary=summary) + "\n"
+        return message
 
     def updateSelf(self, date):
         '''
