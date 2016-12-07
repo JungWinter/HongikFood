@@ -45,7 +45,7 @@ class BaseMessage(Message):
         self.returnedMessage["keyboard"] = keyboard
 
 
-class SummaryMessage(BaseMessage):
+class SummaryMenuMessage(BaseMessage):
     def __init__(self, message, isToday):
         super().__init__()
         self.updateMessage(message)

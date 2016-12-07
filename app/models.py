@@ -162,7 +162,7 @@ class DayMenu():
         self.title = None  # date + dayname
         self.date = None
         self.items = [
-            PlaceMenu("학관"),
+            PlaceMenu("학생회관"),
             PlaceMenu("남문관"),
             PlaceMenu("교직원"),
             PlaceMenu("신기숙사"),
@@ -199,6 +199,14 @@ class DayMenu():
         message = ""
         for place in self.items:
             message += place.returnMenu(summary=summary) + "\n"
+        return message
+
+    def returnPlaceMenu(self, place):
+        '''
+        search 함수도 필요할 듯
+        '''
+        name = ["학생회관", "남문관", "교직원", "신기숙사"]
+        message = self.items[name.index(place)].returnMenu(summary=False)
         return message
 
     def updateSelf(self, date):
