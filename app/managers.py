@@ -38,7 +38,8 @@ class APIManager(metaclass=Singleton):
             step3에 속하면 place정보 파악 필요
             step4에 속하면 place, when정보 파악 필요, 세션 만료
             '''
-            step1 = ["오늘의 식단", "내일의 식단", "식단 평가하기"]
+            step1 = ["오늘의 식단", "내일의 식단"]
+            step6 = ["식단 평가하기"]
             step2 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
             step3 = ["아침", "점심", "저녁"]
             step4 = ["1", "2", "3", "4", "5"]
@@ -55,10 +56,25 @@ class APIManager(metaclass=Singleton):
                     isToday = True
                 elif content == "내일의 식단":
                     isToday = False
-                messageObj = MessageAdmin.getSummaryMessageObject(isToday=isToday)
+                messageObj = MessageAdmin.getMenuMessageObject(summary=True, isToday=isToday)
                 return messageObj
             elif content in step2:
-                pass
+                '''
+                세션에서 history를 가져옴 -> 만약 없으면 Fail처리
+                그래서 식단 평가하기 문맥인지 오늘/내일의 식단 문맥인지 확인
+                그거에 따라 isToday변수 활성화
+                메시지 반환전에 세션에서 삭제
+                '''
+                last = session[user_key]["history"][:]
+                if last[-1] in step1:
+                    if last[-1] == "오늘의 식단":
+                        isToday = True
+                    elif last[-1] == "내일의 식단":
+                        isToday = False
+                elif last[-1] in step6:
+                    del session[user_key]
+                    messageObj = MessageAdmin.getCustomMessageObject("개발중입니다.")
+                    return messageObj
             elif content in step3:
                 pass
             elif content in step4:
@@ -132,8 +148,8 @@ class MessageManager(metaclass=Singleton):
         _message.updateKeyboard(HomeMessage.returnHomeKeyboard())
         return _message
 
-    def getSummaryMessageObject(self, isToday):
-        message = MenuAdmin.returnEveryWhereMenu(summary=True, isToday=isToday)
+    def getMenuMessageObject(self, summary, isToday):
+        message = MenuAdmin.returnEveryWhereMenu(summary=summary, isToday=isToday)
         print(message)
         summaryMessage = SummaryMessage(message, isToday)
         return summaryMessage
