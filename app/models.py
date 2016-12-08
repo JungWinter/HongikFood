@@ -155,6 +155,20 @@ class PlaceMenu():
         reverseMenu = list(reversed(menu))
         for index, item in enumerate(reverseMenu):
             self.items[time[index]]["메뉴"] = item
+            menu = ",".join(item)
+            m = Menu.query.filter_by(
+                date=self.date,
+                place=self.place,
+                time=time[index]).first()
+            if not m:  # 결과값 없음
+                if item:  # 빈 값이 아니면
+                    m = Menu(self.date, self.place, time[index], menu)
+                    db.session.add(m)
+                    db.session.commit()
+            else:  # 결과값 있음
+                if m.menu != menu:  # 비교해봐야지
+                    m.menu = menu
+                    db.session.commit()
 
 
 class DayMenu():

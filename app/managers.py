@@ -5,6 +5,7 @@ from .message import SummaryMenuMessage
 from .models import User, Poll, PlaceMenu, DayMenu
 from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
+from .decorators import processtime
 
 
 class Singleton(type):
@@ -58,8 +59,11 @@ class APIManager(metaclass=Singleton):
                 그거에 따라 isToday변수 활성화
                 메시지 반환전에 세션에서 삭제
                 '''
-                last = session[user_key]["history"][:]
-                del session[user_key]
+                if user_key in session:
+                    last = session[user_key]["history"][:]
+                    del session[user_key]
+                else:
+                    last = ["오늘의 식단"]
                 if last[-1] in step1:
                     if last[-1] == "오늘의 식단":
                         isToday = True
