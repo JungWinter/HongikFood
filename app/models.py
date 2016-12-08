@@ -91,34 +91,37 @@ class PlaceMenu():
         print("점심 : %s" % " ".join(self.items["점심"]["메뉴"]))
         print("저녁 : %s" % " ".join(self.items["저녁"]["메뉴"]))
 
-    def returnMenu(self, summary):
+    def returnMenu(self, summary, time=None):
         '''
         최종 메시지의 형태
         2016.11.11 금요일
-        ■ 남문관 (3,500원)
-        □ 점심 (11:00-15:00)
+        □ 남문관 (3,500원)
+        ■ 점심 (11:00-15:00)
         수제탕수육
         쌀밥
         ...
-        □ 저녁 (16:30-18:30)
+        ■ 저녁 (16:30-18:30)
         제육볶음
         쌀밥
         ...
         '''
-        time = ["아침", "점심", "저녁"]
+        timelist = ["아침", "점심", "저녁"]
         message = ""
-        message += "{} {}\n".format(self.date, self.dayname)
+        # if not time:
+        #     message += "{} {}\n".format(self.date, self.dayname)
         if self.price == "":
             message += "□ {}\n".format(self.place)
         else:
             message += "□ {} ({})\n".format(self.place, self.price)
 
         # 메뉴 정보가 아예 없으면
-        if not any([self.items[t]["메뉴"] for t in time]):
+        if not any([self.items[t]["메뉴"] for t in timelist]):
             message += "식단 정보가 없습니다.\n"
             return message
 
-        for key in time:
+        for key in timelist:
+            if time and key != time:
+                continue
             # 메뉴가 비어있으면 건너뛰기
             if self.items[key]["메뉴"]:
                 if self.items[key]["정보"] == "":
@@ -130,16 +133,16 @@ class PlaceMenu():
                     )
                 # for menu in self.items[key]["메뉴"]:
                 #     message += "{:_>18}\n".format(menu)
+
                 # 메뉴 붙여주기
+                menus = self.items[key]["메뉴"][:]
                 if summary:
                     # 쌀밥 제외
-                    menus = self.items[key]["메뉴"][:]
                     if "쌀밥" in menus:
                         menus.remove("쌀밥")
                     message += "\n".join(menus[:4]) + "\n"
                 else:
-                    message += "\n".join(self.items[key]["메뉴"]) + "\n"
-
+                    message += "\n".join(menus) + "\n"
         return message
 
     def updateDate(self, date):
@@ -210,9 +213,14 @@ class DayMenu():
                 place.items[t]["정보"] = info.pop(0)
 
     def returnAllMenu(self, summary):
-        message = ""
+        message = "{} {}\n".format(self.date, self.dayname)
+        if summary:
+            message += "> 간추린 메뉴입니다.\n"
+            message += "> 쌀밥은 제외했습니다.\n"
         for place in self.items:
             message += place.returnMenu(summary=summary) + "\n"
+        if summary:
+            message += "\n오른쪽으로 넘기시면 다른 버튼도 있습니다.\n"
         return message
 
     def returnPlaceMenu(self, place):
@@ -221,6 +229,12 @@ class DayMenu():
         '''
         name = ["학생회관", "남문관", "교직원", "신기숙사"]
         message = self.items[name.index(place)].returnMenu(summary=False)
+        return message
+
+    def returnTimeMenu(self, time):
+        message = "{} {}\n".format(self.date, self.dayname)
+        for place in self.items:
+            message += place.returnMenu(summary=False, time=time) + "\n"
         return message
 
     def updateSelf(self, date):

@@ -18,7 +18,15 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
+    def getMsgObj(self, summary, isToday, place=None):
+        msgObj = MessageAdmin.getMenuMessageObject(summary, isToday, place)
+        return msgObj
 
+    def getCsutomMsgObj(self, message):
+        msgObj = MessageAdmin.getCustomMessageObject(message)
+        return msgObj
+
+    @processtime
     def process(self, mode, data=None):
         if mode is "home":
             MenuAdmin.updateMenu()
@@ -37,66 +45,64 @@ class APIManager(metaclass=Singleton):
             step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
 
             if content in step1:
-                now = datetime.utcnow() + timedelta(hours=9)
-                now = int(now.timestamp())
+                # now = datetime.utcnow() + timedelta(hours=9)
+                # now = int(now.timestamp())
                 session[user_key] = {
-                    "time": now,
+                    # "time": now,
                     "history": [content]
                 }
+                summary = True
                 if content == "오늘의 식단":
                     isToday = True
                 elif content == "내일의 식단":
                     isToday = False
-                msgObj = MessageAdmin.getMenuMessageObject(True, isToday)
-                return msgObj
+                return self.getMsgObj(summary, isToday)
             elif content in step2:
-                msgObj = MessageAdmin.getCustomMessageObject("개발중입니다.")
-                return msgObj
+                return self.getCsutomMsgObj("개발중입니다.")
             elif content in step3:
-                '''
-                세션에서 history를 가져옴 -> 만약 없으면 Fail처리
-                그래서 식단 평가하기 문맥인지 오늘/내일의 식단 문맥인지 확인
-                그거에 따라 isToday변수 활성화
-                메시지 반환전에 세션에서 삭제
-                '''
                 if user_key in session:
                     last = session[user_key]["history"][:]
                     del session[user_key]
                 else:
                     last = ["오늘의 식단"]
                 if last[-1] in step1:
+                    summary = False
                     if last[-1] == "오늘의 식단":
                         isToday = True
                     elif last[-1] == "내일의 식단":
                         isToday = False
 
                     if content == "전체 식단 보기":
-                        msgObj = MessageAdmin.getMenuMessageObject(False, isToday)
-                        return msgObj
+                        place = None
                     else:
-                        msgObj = MessageAdmin.getMenuMessageObject(False, isToday, content)
-                        return msgObj
+                        place = content
+                    return self.getMsgObj(summary, isToday, place)
 
             elif content in step4:
                 pass
             elif content in step5:
-                '''
-                평가를 DB에 기록
-                '''
                 if user_key in session:
                     del session[user_key]
-            elif content in step6:
+            elif content in step11:
                 if user_key in session:
                     del session[user_key]
+                if content == "오늘의 점심":
+                    isToday = True
+                    time = "점심"
+                elif content == "오늘의 저녁":
+                    isToday = True
+                    time = "저녁"
+                elif content == "내일의 아침":
+                    isToday = False
+                    time = "아침"
+                msgObj = MessageAdmin.getMenuMessageObject(False, isToday, None, time)
+                return msgObj
             elif content == "취소":
                 if user_key in session:
                     del session[user_key]
                 msgObj = MessageAdmin.getCustomMessageObject("취소하셨습니다.")
                 return msgObj
         elif mode is "add":
-            '''
-            새로운 유저 등록
-            '''
             user_key = data["user_key"]
             u = User(user_key)
             db.session.add(u)
@@ -106,10 +112,6 @@ class APIManager(metaclass=Singleton):
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
         elif mode is "block":
-            '''
-            유효성 검사
-            기존 유저 삭제
-            '''
             user_key = data
             if session.get(user_key) is not None:
                 session.pop(user_key)
@@ -122,10 +124,6 @@ class APIManager(metaclass=Singleton):
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
         elif mode is "exit":
-            '''
-            유효성 검사
-            세션 정보 삭제
-            '''
             user_key = data
             if session.get(user_key) is not None:
                 session.pop(user_key)
@@ -149,15 +147,20 @@ class MessageManager(metaclass=Singleton):
         _message.updateKeyboard(HomeMessage.returnHomeKeyboard())
         return _message
 
-    def getMenuMessageObject(self, summary, isToday, place=None):
+    def getMenuMessageObject(self, summary, isToday, place=None, time=None):
         if not place:
-            message = MenuAdmin.returnEveryWhereMenu(summary, isToday)
-            if summary:
-                summaryMessage = SummaryMenuMessage(message, isToday)
-                return summaryMessage
+            if not time:
+                message = MenuAdmin.returnEveryWhereMenu(summary, isToday)
+                if summary:
+                    summaryMessage = SummaryMenuMessage(message, isToday)
+                    return summaryMessage
+                else:
+                    wholeMessage = self.getCustomMessageObject(message)
+                    return wholeMessage
             else:
-                wholeMessage = self.getCustomMessageObject(message)
-                return wholeMessage
+                message = MenuAdmin.returnTimeMenu(isToday, time)
+                timeMessage = self.getCustomMessageObject(message)
+                return timeMessage
         else:
             message = MenuAdmin.returnSpecificMenu(isToday, place)
             placeMessage = self.getCustomMessageObject(message)
@@ -230,11 +233,12 @@ class MenuManager(metaclass=Singleton):
         message = self.weekend[wday-1].returnPlaceMenu(place)
         return message
 
-    def returnDinner(self):
-        pass
-
-    def returnLunch(self):
-        pass
+    def returnTimeMenu(self, isToday, time):  # 오늘의 점심
+        wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
+        if not isToday:
+            wday = (wday + 1) % 7
+        message = self.weekend[wday-1].returnTimeMenu(time)
+        return message
 
 
 APIAdmin = APIManager()
