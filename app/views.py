@@ -6,6 +6,7 @@ from .managers import APIAdmin, MessageAdmin, UserSessionAdmin, MenuAdmin
 # from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from .myLogger import viewLog
 from .decorators import processtime
+import traceback
 
 
 EXPIRE_LIMIT_SECONDS = 20
@@ -66,6 +67,7 @@ def yellowMessage():
         message = APIAdmin.process("message", request.json).getMessage()
         return jsonify(message), 200
     except:
+        traceback.print_exc()
         return processFail(), 400
 
 

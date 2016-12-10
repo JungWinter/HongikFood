@@ -3,6 +3,7 @@ from os import path, urandom
 basedir = path.abspath(path.dirname(__file__))
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + path.join(basedir, 'test.db')
+# SQLALCHEMY_DATEBASE_URI = 'sqlite:////home/winterj/HongikFood/app/production.db'
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 

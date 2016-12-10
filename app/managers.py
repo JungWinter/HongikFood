@@ -58,7 +58,8 @@ class APIManager(metaclass=Singleton):
                     isToday = False
                 return self.getMsgObj(summary, isToday)
             elif content in step2:
-                return self.getCsutomMsgObj("개발중입니다.")
+                message = "개발중입니다.\n피드백과 기능개선 제안은 https://open.kakao.com/o/sq2jVlo 오픈채팅방 혹은 1:1대화로 알려주시면 감사히 듣겠습니다!"
+                return self.getCsutomMsgObj(message)
             elif content in step3:
                 if user_key in session:
                     last = session[user_key]["history"][:]
@@ -223,21 +224,30 @@ class MenuManager(metaclass=Singleton):
         wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
         if not isToday:
             wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnAllMenu(summary)
+        if wday == 6:
+            message = "식단 정보가 없습니다."
+            return message
+        message = self.weekend[wday].returnAllMenu(summary)
         return message
 
     def returnSpecificMenu(self, isToday, place):
         wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
         if not isToday:
             wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnPlaceMenu(place)
+        if wday == 6:
+            message = "식단 정보가 없습니다."
+            return message
+        message = self.weekend[wday].returnPlaceMenu(place)
         return message
 
     def returnTimeMenu(self, isToday, time):  # 오늘의 점심
         wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
         if not isToday:
             wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnTimeMenu(time)
+        if wday == 6:
+            message = "식단 정보가 없습니다."
+            return message
+        message = self.weekend[wday].returnTimeMenu(time)
         return message
 
 
