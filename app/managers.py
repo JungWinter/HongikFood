@@ -26,7 +26,6 @@ class APIManager(metaclass=Singleton):
         msgObj = MessageAdmin.getCustomMessageObject(message)
         return msgObj
 
-    @processtime
     def process(self, mode, data=None):
         if mode is "home":
             MenuAdmin.updateMenu()
@@ -45,10 +44,7 @@ class APIManager(metaclass=Singleton):
             step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
 
             if content in step1:
-                # now = datetime.utcnow() + timedelta(hours=9)
-                # now = int(now.timestamp())
                 session[user_key] = {
-                    # "time": now,
                     "history": [content]
                 }
                 summary = True
@@ -151,6 +147,8 @@ class MessageManager(metaclass=Singleton):
         if not place:
             if not time:
                 message = MenuAdmin.returnEveryWhereMenu(summary, isToday)
+                if message == "식단 정보가 없습니다.":
+                    return self.getCustomMessageObject(message)
                 if summary:
                     summaryMessage = SummaryMenuMessage(message, isToday)
                     return summaryMessage
@@ -218,26 +216,40 @@ class MenuManager(metaclass=Singleton):
             for index, day in enumerate(self.weekend):
                 day.update(date=dates[index], menu=menus[index])
 
-    def returnEveryWhereMenu(self, summary, isToday):
-        self.updateMenu()
+    def calcWday(self, isToday):
         wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
         if not isToday:
             wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnAllMenu(summary)
+        return wday
+
+    def checkWday(self, wday):
+        if wday == 6:
+            return False
+        return True
+
+    def returnEveryWhereMenu(self, summary, isToday):
+        self.updateMenu()
+        wday = self.calcWday()
+        if self.checkWday(wday):
+            message = self.weekend[wday].returnAllMenu(summary)
+        else:
+            message = "식단 정보가 없습니다."
         return message
 
     def returnSpecificMenu(self, isToday, place):
-        wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
-        if not isToday:
-            wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnPlaceMenu(place)
+        wday = self.calcWday()
+        if self.checkWday(wday):
+            message = self.weekend[wday].returnPlaceMenu(place)
+        else:
+            message = "식단 정보가 없습니다."
         return message
 
-    def returnTimeMenu(self, isToday, time):  # 오늘의 점심
-        wday = datetime.weekday(datetime.utcnow() + timedelta(hours=9))
-        if not isToday:
-            wday = (wday + 1) % 7
-        message = self.weekend[wday-1].returnTimeMenu(time)
+    def returnTimeMenu(self, isToday, time):
+        wday = self.calcWday()
+        if self.checkWday(wday):
+            message = self.weekend[wday].returnTimeMenu(time)
+        else:
+            message = "식단 정보가 없습니다."
         return message
 
 
