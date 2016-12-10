@@ -2,6 +2,7 @@
 from app import app, db, session
 from flask import request, jsonify
 from datetime import timedelta, datetime
+import traceback
 from .managers import APIAdmin, MessageAdmin, UserSessionAdmin, MenuAdmin
 # from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from .myLogger import viewLog
@@ -66,6 +67,7 @@ def yellowMessage():
         message = APIAdmin.process("message", request.json).getMessage()
         return jsonify(message), 200
     except:
+        traceback.print_exc()
         return processFail(), 400
 
 
