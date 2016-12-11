@@ -1,51 +1,11 @@
 # -*- coding: utf-8 -*-
-from app import app, db, session
+from app import app
 from flask import request, jsonify
 from datetime import timedelta, datetime
 import traceback
 from .managers import APIAdmin, MessageAdmin, UserSessionAdmin, MenuAdmin
-# from .managers import APIManager, MessageManager, UserSessionManager, MenuManager
 from .myLogger import viewLog
 from .decorators import processtime
-
-
-EXPIRE_LIMIT_SECONDS = 20
-# APIAdmin = APIManager()
-# MessageAdmin = MessageManager()
-# UserSessionAdmin = UserSessionManager()
-# MenuAdmin = MenuManager()
-
-@app.route("/api/failtest", methods=["GET"])
-def failtest():
-    return processFail(), 400
-
-
-@app.route("/api/session", methods=["GET"])
-def sessiontest():
-    print(session)
-    return str(session), 200
-
-
-@app.route("/api/session/<value>", methods=["GET"])
-def sessioninputtest(value):
-    now = datetime.utcnow() + timedelta(hours=9)
-    now = int(now.timestamp())
-    session[value] = {
-        "time": now,
-        "act": "test",
-    }
-    print(session)
-    return str(session), 200
-
-
-@processtime
-def sessionCheck():
-    now = datetime.utcnow() + timedelta(hours=9)
-    now = int(now.timestamp())
-
-    for key in list(session):
-        if now - session[key]["time"] > EXPIRE_LIMIT_SECONDS:
-            del session[key]
 
 
 def processFail():

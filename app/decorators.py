@@ -8,10 +8,9 @@ def processtime(func):
     '''
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print(">>>>", func.__name__)
         start = time()
         result = func(*args, **kwargs)
         during = time() - start
-        print(">>>>", func.__name__, ">> processing time : %.5fs" % during)
+        print(">>", func.__name__, ">> %.5fs" % during)
         return result
     return wrapper
