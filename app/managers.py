@@ -26,7 +26,7 @@ class APIManager(metaclass=Singleton):
         msgObj = MessageAdmin.getCustomMessageObject(message)
         return msgObj
 
-    @processtime
+    # @processtime
     def process(self, mode, data=None):
         if mode is "home":
             MenuAdmin.updateMenu()
