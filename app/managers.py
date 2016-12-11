@@ -38,8 +38,9 @@ class APIManager(metaclass=Singleton):
             content = data["content"]
             u = User.query.filter_by(user_key=user_key).first()
             if u is None:
+                u = User(user_key)
                 db.session.add(u)
-                db.commit()
+                db.session.commit()
 
             step1 = ["오늘의 식단", "내일의 식단"]
             step2 = ["식단 평가하기"]
@@ -59,7 +60,7 @@ class APIManager(metaclass=Singleton):
                     isToday = False
                 return self.getMsgObj(summary, isToday)
             elif content in step2:
-                return self.getCsutomMsgObj("개발중입니다.")
+                return self.getCsutomMsgObj("개발중입니다!\n피드백은 https://open.kakao.com/o/sq2jVlo 혹은 1:1대화로 말해주시면 감사히 듣겠습니다!")
             elif content in step3:
                 if user_key in session:
                     last = session[user_key]["history"][:]
