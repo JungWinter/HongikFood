@@ -8,6 +8,6 @@ app.config.from_pyfile("config.py")
 db = SQLAlchemy(app)
 session = defaultdict()
 
-from app import views, models, myLogger
+from app import models, myLogger
 
 myLogger.setLogger(app, 20)

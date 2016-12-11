@@ -36,6 +36,10 @@ class APIManager(metaclass=Singleton):
             user_key = data["user_key"]
             request_type = data["type"]
             content = data["content"]
+            u = User.query.filter_by(user_key=user_key).first()
+            if u is None:
+                db.session.add(u)
+                db.commit()
 
             step1 = ["오늘의 식단", "내일의 식단"]
             step2 = ["식단 평가하기"]
