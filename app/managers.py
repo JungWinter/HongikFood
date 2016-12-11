@@ -2,7 +2,8 @@ from app import db, session
 from datetime import timedelta, datetime
 from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
 from .message import SummaryMenuMessage
-from .models import User, Poll, PlaceMenu, DayMenu
+from .models import User, Poll
+from .menu import PlaceMenu, DayMenu
 from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
 from .decorators import processtime
