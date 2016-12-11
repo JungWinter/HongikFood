@@ -60,7 +60,7 @@ class APIManager(metaclass=Singleton):
                     isToday = False
                 return self.getMsgObj(summary, isToday)
             elif content in step2:
-                return self.getCsutomMsgObj("개발중입니다.")
+                return self.getCsutomMsgObj("개발중입니다!\n피드백은 https://open.kakao.com/o/sq2jVlo 혹은 1:1대화로 말해주시면 감사히 듣겠습니다!")
             elif content in step3:
                 if user_key in session:
                     last = session[user_key]["history"][:]
