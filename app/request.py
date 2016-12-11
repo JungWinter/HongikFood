@@ -3,13 +3,16 @@ from bs4 import BeautifulSoup
 
 soup = None
 
+
 def _tagTostr(tag):
     return tag.get_text().strip()
+
 
 def _getSoup():
     r = requests.get("http://apps.hongik.ac.kr/food/food.php")
     soup = BeautifulSoup(r.text, "html.parser")
     return soup
+
 
 def _soupToDates(soup):
     thead = _tagTostr(soup.find("thead"))
@@ -18,6 +21,7 @@ def _soupToDates(soup):
     value = [w[4:-1] for w in head]  # 2016.11.21, 2016.11.22, ...
     dates = list(zip(key, value))
     return dates
+
 
 def _soupToMenus(soup):
     '''
@@ -38,6 +42,7 @@ def _soupToMenus(soup):
         cols = [list(col) for col in zip(*rows)]
     return cols
 
+
 def _soupToSubtitles(soup):
     '''
     subtitle은 학생회관 남문관은 장소 / 시간등의 정보
@@ -50,6 +55,7 @@ def _soupToSubtitles(soup):
     '''
     subtitles = [_tagTostr(i) for i in soup.find_all("tr", class_="subtitle")]
     return subtitles
+
 
 def getDatesAndMenus():
     '''
