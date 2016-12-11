@@ -3,14 +3,9 @@ from datetime import timedelta, datetime
 from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
 from .message import SummaryMenuMessage
 from .models import User, Poll, PlaceMenu, DayMenu
-<<<<<<< HEAD
-from .myLogger import managerLog
-from .request import getDatesAndMenus
-=======
 from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
 from .decorators import processtime
->>>>>>> origin/master
 
 
 class Singleton(type):
@@ -34,13 +29,8 @@ class APIManager(metaclass=Singleton):
     def process(self, mode, data=None):
         if mode is "home":
             MenuAdmin.updateMenu()
-<<<<<<< HEAD
-            messageObj = MessageAdmin.getHomeMessageObject()
-            return messageObj
-=======
             msgObj = MessageAdmin.getHomeMessageObject()
             return msgObj
->>>>>>> origin/master
         elif mode is "message":
             user_key = data["user_key"]
             request_type = data["type"]
@@ -199,17 +189,6 @@ class UserSessionManager(metaclass=Singleton):
 
 
 class MenuManager(metaclass=Singleton):
-<<<<<<< HEAD
-
-=======
-    '''
-    Testcase:
-        오늘의 학생식당 식단
-        내일의 남문관 식단
-        오늘의 점심
-        내일의 전체메뉴 보기
-    '''
->>>>>>> origin/master
     def __init__(self):
         mon = DayMenu("월요일")
         tue = DayMenu("화요일")
@@ -218,16 +197,8 @@ class MenuManager(metaclass=Singleton):
         fri = DayMenu("금요일")
         sat = DayMenu("토요일")
         self.weekend = [mon, tue, wed, thu, fri, sat]
-<<<<<<< HEAD
-
-    def updateMenu(self):
-        dates, menus = getDatesAndMenus()
-        for index, day in enumerate(self.weekend):
-            day.update(date=dates[index], menu=menus[index])
-=======
         self.lastUpdateTime = 0
         self.updateMenu()
->>>>>>> origin/master
 
     def updateMenu(self):
         now = int(datetime.timestamp(datetime.utcnow() + timedelta(hours=9)))
