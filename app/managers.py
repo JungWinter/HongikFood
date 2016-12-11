@@ -223,7 +223,7 @@ class MenuManager(metaclass=Singleton):
 
     def returnEveryWhereMenu(self, summary, isToday):
         self.updateMenu()
-        wday = self.calcWday()
+        wday = self.calcWday(isToday)
         if self.checkWday(wday):
             message = self.weekend[wday].returnAllMenu(summary)
         else:
@@ -231,7 +231,7 @@ class MenuManager(metaclass=Singleton):
         return message
 
     def returnSpecificMenu(self, isToday, place):
-        wday = self.calcWday()
+        wday = self.calcWday(isToday)
         if self.checkWday(wday):
             message = self.weekend[wday].returnPlaceMenu(place)
         else:
@@ -239,7 +239,7 @@ class MenuManager(metaclass=Singleton):
         return message
 
     def returnTimeMenu(self, isToday, time):
-        wday = self.calcWday()
+        wday = self.calcWday(isToday)
         if self.checkWday(wday):
             message = self.weekend[wday].returnTimeMenu(time)
         else:
