@@ -1,5 +1,6 @@
 from app import db, session
 from datetime import timedelta, datetime
+from datetime import time as createTime
 from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
 from .message import SummaryMenuMessage, EvaluateMessage
 from .models import User, Poll, Menu
@@ -96,10 +97,41 @@ class APIManager(metaclass=Singleton):
             step4 = ["아침", "점심", "저녁"]
             if content in step4:
                 if user_key in session:
+                    date = datetime.strftime(
+                        datetime.utcnow() + timedelta(hours=9),
+                        "%Y.%m.%d")
+                    place = session[user_key]["history"][-1]
                     time = content
-                    session[user_key]["history"].append(time)
-                    message = "점수를 골라주세요."
-                    return self.getEvalMsgObj(message, 3)
+                    timelimit = {
+                        "아침": createTime(hour=7, minute=20),
+                        "점심": createTime(hour=10, minute=50),
+                        "저녁": createTime(hour=16, minute=20),
+                    }
+                    u = User.query.filter_by(user_key=user_key).first()
+                    m = Menu.query.filter_by(
+                        date=date,
+                        place=place,
+                        time=time).first()
+                    if m is None:  # 해당 장소에 해당 시간대가 없음
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
+
+                    now = datetime.utcnow() + timedelta(hours=10)
+                    timenow = datetime.time(now)
+                    if timenow < timelimit[time]:
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("아직 {}시간이 아닙니다.".format(time))
+                    p = Poll.query.filter_by(menu=m, user=u).first()
+                    if p is None:
+                        session[user_key]["history"].append(time)
+                        message = "점수를 골라주세요."
+                        return self.getEvalMsgObj(message, 3)
+                    else:
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("{}식당의 {}에 이미 투표하셨습니다.".format(place, time))
                 else:
                     raise
 
@@ -110,17 +142,15 @@ class APIManager(metaclass=Singleton):
                     date = datetime.strftime(
                         datetime.utcnow() + timedelta(hours=9),
                         "%Y.%m.%d")
-                    time = history.pop()
-                    place = history.pop()
+                    time = history[-1]
+                    place = history[-2]
                     score = int(content)
-                    print(date, place, time, score)
                     u = User.query.filter_by(user_key=user_key).first()
                     m = Menu.query.filter_by(
                         date=date,
                         place=place,
                         time=time).first()
                     p = Poll(score, menu=m, user=u)
-                    print(u, m, p)
                     db.session.add(p)
                     db.session.commit()
                     message = "평가해주셔서 감사합니다."
@@ -143,8 +173,8 @@ class APIManager(metaclass=Singleton):
                 if user_key in session:
                     del session[user_key]
                 return self.getCustomMsgObj("취소하셨습니다.")
-
             # 여기까지도 안걸러 졌으면 주관식 답변으로 간주
+
         elif mode is "add":
             user_key = data["user_key"]
             u = User(user_key)
