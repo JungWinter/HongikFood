@@ -77,9 +77,6 @@ class PlaceMenu():
                         key,
                         self.items[key]["정보"]
                     )
-                # for menu in self.items[key]["메뉴"]:
-                #     message += "{:_>18}\n".format(menu)
-
                 # 메뉴 붙여주기
                 menus = self.items[key]["메뉴"][:]
                 if summary:

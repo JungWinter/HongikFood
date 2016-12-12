@@ -45,6 +45,28 @@ class BaseMessage(Message):
         self.returnedMessage["keyboard"] = keyboard
 
 
+class EvaluateMessage(BaseMessage):
+    def __init__(self, message, step):
+        '''
+        step 1 : 식단 평가하기 -> 장소
+        step 2 : 장소 -> 시간대
+        step 3 : 시간대 -> 점수
+        step 4 : 점수 -> 끝
+        '''
+        super().__init__()
+        self.updateMessage(message)
+        if step == 1:
+            self.updateKeyboard(Keyboard.placeButtons)
+        elif step == 2:
+            self.updateKeyboard(Keyboard.timeButtons)
+        elif step == 3:
+            self.updateKeyboard(Keyboard.scoreButtons)
+        elif step == 4:
+            self.updateKeyboard(Keyboard.homeButtons)
+        else:
+            raise
+
+
 class SummaryMenuMessage(BaseMessage):
     def __init__(self, message, isToday):
         super().__init__()

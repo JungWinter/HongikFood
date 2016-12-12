@@ -1,8 +1,9 @@
 from app import db, session
 from datetime import timedelta, datetime
+from datetime import time as createTime
 from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
-from .message import SummaryMenuMessage
-from .models import User, Poll
+from .message import SummaryMenuMessage, EvaluateMessage
+from .models import User, Poll, Menu
 from .menu import PlaceMenu, DayMenu
 from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
@@ -19,13 +20,20 @@ class Singleton(type):
 
 
 class APIManager(metaclass=Singleton):
-    def getMsgObj(self, summary, isToday, place=None):
-        msgObj = MessageAdmin.getMenuMessageObject(summary, isToday, place)
+    def getMsgObj(self, summary, isToday, place=None, time=None):
+        msgObj = MessageAdmin.getMenuMessageObject(summary, isToday, place, time)
         return msgObj
 
-    def getCsutomMsgObj(self, message):
+    def getCustomMsgObj(self, message):
         msgObj = MessageAdmin.getCustomMessageObject(message)
         return msgObj
+
+    def getEvalMsgObj(self, message, step):
+        msgObj = MessageAdmin.getEvaluateMessageObject(message, step)
+        return msgObj
+
+    def checkToday(self, string):
+        return True if string[:2] == "오늘" else False
 
     def process(self, mode, data=None):
         if mode is "home":
@@ -43,67 +51,130 @@ class APIManager(metaclass=Singleton):
                 db.session.commit()
 
             step1 = ["오늘의 식단", "내일의 식단"]
-            step2 = ["식단 평가하기"]
-            step3 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
-            step4 = ["아침", "점심", "저녁"]
-            step5 = ["1", "2", "3", "4", "5"]
-            step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
-
             if content in step1:
                 session[user_key] = {
                     "history": [content]
                 }
                 summary = True
-                if content == "오늘의 식단":
-                    isToday = True
-                elif content == "내일의 식단":
-                    isToday = False
+                isToday = self.checkToday(content)
                 return self.getMsgObj(summary, isToday)
-            elif content in step2:
-                return self.getCsutomMsgObj("개발중입니다!\n피드백은 https://open.kakao.com/o/sq2jVlo 혹은 1:1대화로 말해주시면 감사히 듣겠습니다!")
-            elif content in step3:
+
+            step2 = ["식단 평가하기"]
+            if content in step2:
+                session[user_key] = {
+                    "history": [content]
+                }
+                message = "개발중입니다!\n\
+                    피드백은 https://open.kakao.com/o/sq2jVlo\
+                    혹은 1:1대화로 말해주시면 감사히 듣겠습니다!"
+                return self.getEvalMsgObj(message, 1)
+
+            step3 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
+            if content in step3:
                 if user_key in session:
                     last = session[user_key]["history"][:]
-                    del session[user_key]
                 else:
                     last = ["오늘의 식단"]
                 if last[-1] in step1:
                     summary = False
-                    if last[-1] == "오늘의 식단":
-                        isToday = True
-                    elif last[-1] == "내일의 식단":
-                        isToday = False
-
+                    isToday = self.checkToday(last[-1])
                     if content == "전체 식단 보기":
                         place = None
                     else:
                         place = content
+                    if user_key in session:
+                        del session[user_key]
                     return self.getMsgObj(summary, isToday, place)
+                elif last[-1] in step2:  # 식단평가하기에서 place를 고른상태
+                    place = content
+                    # 이미 user_key는 session에 있는걸 확인함
+                    session[user_key]["history"].append(place)
+                    message = "시간대를 골라주세요."
+                    return self.getEvalMsgObj(message, 2)
+                else:
+                    raise
 
-            elif content in step4:
-                pass
-            elif content in step5:
+            step4 = ["아침", "점심", "저녁"]
+            if content in step4:
+                if user_key in session:
+                    date = datetime.strftime(
+                        datetime.utcnow() + timedelta(hours=9),
+                        "%Y.%m.%d")
+                    place = session[user_key]["history"][-1]
+                    time = content
+                    timelimit = {
+                        "아침": createTime(hour=7, minute=20),
+                        "점심": createTime(hour=10, minute=50),
+                        "저녁": createTime(hour=16, minute=20),
+                    }
+                    u = User.query.filter_by(user_key=user_key).first()
+                    m = Menu.query.filter_by(
+                        date=date,
+                        place=place,
+                        time=time).first()
+                    if m is None:  # 해당 장소에 해당 시간대가 없음
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
+
+                    now = datetime.utcnow() + timedelta(hours=10)
+                    timenow = datetime.time(now)
+                    if timenow < timelimit[time]:
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("아직 {}시간이 아닙니다.".format(time))
+                    p = Poll.query.filter_by(menu=m, user=u).first()
+                    if p is None:
+                        session[user_key]["history"].append(time)
+                        message = "점수를 골라주세요."
+                        return self.getEvalMsgObj(message, 3)
+                    else:
+                        if user_key in session:
+                            del session[user_key]
+                        return self.getCustomMsgObj("{}식당의 {}에 이미 투표하셨습니다.".format(place, time))
+                else:
+                    raise
+
+            step5 = ["1", "2", "3", "4", "5"]
+            if content in step5:
+                if user_key in session:
+                    history = session[user_key]["history"][:]
+                    date = datetime.strftime(
+                        datetime.utcnow() + timedelta(hours=9),
+                        "%Y.%m.%d")
+                    time = history[-1]
+                    place = history[-2]
+                    score = int(content)
+                    u = User.query.filter_by(user_key=user_key).first()
+                    m = Menu.query.filter_by(
+                        date=date,
+                        place=place,
+                        time=time).first()
+                    p = Poll(score, menu=m, user=u)
+                    db.session.add(p)
+                    db.session.commit()
+                    message = "평가해주셔서 감사합니다."
+                    del session[user_key]
+                    return self.getEvalMsgObj(message, 4)
+                else:
+                    raise
+
+            step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
+            if content in step11:
                 if user_key in session:
                     del session[user_key]
-            elif content in step11:
+                summary = False
+                isToday = self.checkToday(content)
+                place = None
+                time = content[-2:]
+                return self.getMsgObj(summary, isToday, place, time)
+
+            if content == "취소":
                 if user_key in session:
                     del session[user_key]
-                if content == "오늘의 점심":
-                    isToday = True
-                    time = "점심"
-                elif content == "오늘의 저녁":
-                    isToday = True
-                    time = "저녁"
-                elif content == "내일의 아침":
-                    isToday = False
-                    time = "아침"
-                msgObj = MessageAdmin.getMenuMessageObject(False, isToday, None, time)
-                return msgObj
-            elif content == "취소":
-                if user_key in session:
-                    del session[user_key]
-                msgObj = MessageAdmin.getCustomMessageObject("취소하셨습니다.")
-                return msgObj
+                return self.getCustomMsgObj("취소하셨습니다.")
+            # 여기까지도 안걸러 졌으면 주관식 답변으로 간주
+
         elif mode is "add":
             user_key = data["user_key"]
             u = User(user_key)
@@ -144,31 +215,22 @@ class MessageManager(metaclass=Singleton):
     MessageManager는 Message와 Keyboard를 조합해 리턴한다.
     '''
     def getCustomMessageObject(self, message):
-        _message = BaseMessage()
-        _message.updateMessage(message)
-        _message.updateKeyboard(HomeMessage.returnHomeKeyboard())
-        return _message
+        returnedMessage = BaseMessage()
+        returnedMessage.updateMessage(message)
+        returnedMessage.updateKeyboard(HomeMessage.returnHomeKeyboard())
+        return returnedMessage
 
     def getMenuMessageObject(self, summary, isToday, place=None, time=None):
-        if not place:
-            if not time:
-                message = MenuAdmin.returnEveryWhereMenu(summary, isToday)
-                if message == "식단 정보가 없습니다.":
-                    return self.getCustomMessageObject(message)
-                if summary:
-                    summaryMessage = SummaryMenuMessage(message, isToday)
-                    return summaryMessage
-                else:
-                    wholeMessage = self.getCustomMessageObject(message)
-                    return wholeMessage
-            else:
-                message = MenuAdmin.returnTimeMenu(isToday, time)
-                timeMessage = self.getCustomMessageObject(message)
-                return timeMessage
-        else:
-            message = MenuAdmin.returnSpecificMenu(isToday, place)
-            placeMessage = self.getCustomMessageObject(message)
-            return placeMessage
+        message = MenuAdmin.returnMenu(isToday, summary, place, time)
+        if message == "식단 정보가 없습니다.":
+            return self.getCustomMessageObject(message)
+        if summary:
+            return SummaryMenuMessage(message, isToday)
+        return self.getCustomMessageObject(message)
+
+    def getEvaluateMessageObject(self, message, step):
+        evalMessage = EvaluateMessage(message, step)
+        return evalMessage
 
     def getHomeMessageObject(self):
         homeMessage = HomeMessage()
@@ -222,31 +284,19 @@ class MenuManager(metaclass=Singleton):
         return wday
 
     def checkWday(self, wday):
-        if wday == 6:
-            return False
-        return True
+        return False if wday == 6 else True
 
-    def returnEveryWhereMenu(self, summary, isToday):
+    def returnMenu(self, isToday, summary=False, place=None, time=None):
         self.updateMenu()
         wday = self.calcWday(isToday)
+        message = ""
         if self.checkWday(wday):
-            message = self.weekend[wday].returnAllMenu(summary)
-        else:
-            message = "식단 정보가 없습니다."
-        return message
-
-    def returnSpecificMenu(self, isToday, place):
-        wday = self.calcWday(isToday)
-        if self.checkWday(wday):
-            message = self.weekend[wday].returnPlaceMenu(place)
-        else:
-            message = "식단 정보가 없습니다."
-        return message
-
-    def returnTimeMenu(self, isToday, time):
-        wday = self.calcWday(isToday)
-        if self.checkWday(wday):
-            message = self.weekend[wday].returnTimeMenu(time)
+            if not place and not time:
+                message = self.weekend[wday].returnAllMenu(summary)
+            elif place:
+                message = self.weekend[wday].returnPlaceMenu(place)
+            elif time:
+                message = self.weekend[wday].returnTimeMenu(time)
         else:
             message = "식단 정보가 없습니다."
         return message
