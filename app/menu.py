@@ -81,7 +81,7 @@ class PlaceMenu():
                         self.items[key]["정보"]
                     )
                 # 평점 붙여주기
-                message += self.items[key]["평점"] + "\n"
+                message += "▶ " + self.items[key]["평점"] + "\n"
                 # 메뉴 붙여주기
                 menus = self.items[key]["메뉴"][:]
                 if summary:
@@ -200,6 +200,19 @@ class DayMenu():
         message = "{} {}\n".format(self.date, self.dayname)
         for place in self.items:
             message += place.returnMenu(summary=False, time=time) + "\n"
+        return message
+
+    def returnScore(self):
+        message = ""
+        times = ["아침", "점심", "저녁"]
+        for place in self.items:
+            for time in times:
+                if place.items[time]["메뉴"]:
+                    message += "{} {} : {}\n".format(
+                        place.place,
+                        time,
+                        place.items[time]["평점"]
+                    )
         return message
 
     def updateSelf(self, date):
