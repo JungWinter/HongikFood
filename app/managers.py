@@ -64,9 +64,7 @@ class APIManager(metaclass=Singleton):
                 session[user_key] = {
                     "history": [content]
                 }
-                message = "개발중입니다!\n\
-                    피드백은 https://open.kakao.com/o/sq2jVlo\
-                    혹은 1:1대화로 말해주시면 감사히 듣겠습니다!"
+                message = MenuAdmin.returnScore()
                 return self.getEvalMsgObj(message, 1)
 
             step3 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
@@ -117,7 +115,7 @@ class APIManager(metaclass=Singleton):
                             del session[user_key]
                         return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
 
-                    now = datetime.utcnow() + timedelta(hours=10)
+                    now = datetime.utcnow() + timedelta(hours=9)
                     timenow = datetime.time(now)
                     if timenow < timelimit[time]:
                         if user_key in session:
@@ -299,6 +297,15 @@ class MenuManager(metaclass=Singleton):
                 message = self.weekend[wday].returnTimeMenu(time)
         else:
             message = "식단 정보가 없습니다."
+        return message
+
+    def returnScore(self):
+        wday = self.calcWday(isToday=True)
+        message = ""
+        if self.checkWday(wday):
+            message = self.weekend[wday].returnScore()
+        else:
+            "평가할 식단이 없습니다."
         return message
 
 

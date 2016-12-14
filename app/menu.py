@@ -1,6 +1,6 @@
 from app import db
 from datetime import datetime, timedelta
-from .models import Menu
+from .models import Menu, Poll
 
 
 class PlaceMenu():
@@ -12,14 +12,17 @@ class PlaceMenu():
             "아침": {
                 "정보": None,
                 "메뉴": [],
+                "평점": None,
             },
             "점심": {
                 "정보": None,
                 "메뉴": [],
+                "평점": None,
             },
             "저녁": {
                 "정보": None,
                 "메뉴": [],
+                "평점": None,
             },
         }
         self.place = place
@@ -77,6 +80,8 @@ class PlaceMenu():
                         key,
                         self.items[key]["정보"]
                     )
+                # 평점 붙여주기
+                message += "▶ " + self.items[key]["평점"] + "\n"
                 # 메뉴 붙여주기
                 menus = self.items[key]["메뉴"][:]
                 if summary:
@@ -115,6 +120,23 @@ class PlaceMenu():
                 if m.menu != menu:  # 비교해봐야지
                     m.menu = menu
                     db.session.commit()
+
+    def updateScore(self):
+        for time in self.items:
+            # self.items[time]
+            m = Menu.query.filter_by(
+                date=self.date,
+                place=self.place,
+                time=time
+            ).first()
+            if m:  # 결과값 있음
+                polls = Poll.query.filter_by(menu=m).all()
+                count = len(polls)
+                if count:  # 0 이상임
+                    scoreSum = sum(p.score for p in polls)
+                    self.items[time]["평점"] = "%.1f / 5.0" % (scoreSum / count)
+                else:
+                    self.items[time]["평점"] = "평가없음"
 
 
 class DayMenu():
@@ -180,6 +202,19 @@ class DayMenu():
             message += place.returnMenu(summary=False, time=time) + "\n"
         return message
 
+    def returnScore(self):
+        message = ""
+        times = ["아침", "점심", "저녁"]
+        for place in self.items:
+            for time in times:
+                if place.items[time]["메뉴"]:
+                    message += "{} {} : {}\n".format(
+                        place.place,
+                        time,
+                        place.items[time]["평점"]
+                    )
+        return message
+
     def updateSelf(self, date):
         '''
         아마 맞겠지만 그래도 검증
@@ -205,3 +240,4 @@ class DayMenu():
             for index, item in enumerate(self.items):
                 item.updateDate(date)
                 item.updateMenu(divMenu[index])
+                item.updateScore()
