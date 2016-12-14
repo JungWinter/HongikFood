@@ -117,7 +117,7 @@ class APIManager(metaclass=Singleton):
                             del session[user_key]
                         return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
 
-                    now = datetime.utcnow() + timedelta(hours=10)
+                    now = datetime.utcnow() + timedelta(hours=9)
                     timenow = datetime.time(now)
                     if timenow < timelimit[time]:
                         if user_key in session:
