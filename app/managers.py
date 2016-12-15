@@ -4,10 +4,9 @@ from datetime import time as createTime
 from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
 from .message import SummaryMenuMessage, EvaluateMessage
 from .models import User, Poll, Menu
-from .menu import PlaceMenu, DayMenu
+from .menu import DayMenu
 from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
-from .decorators import processtime
 
 
 class Singleton(type):
@@ -49,6 +48,11 @@ class APIManager(metaclass=Singleton):
                 u = User(user_key)
                 db.session.add(u)
                 db.session.commit()
+            else:
+                u.last_active_date = datetime.strftime(
+                    datetime.utcnow() + timedelta(hours=9),
+                    "%Y.%m.%d %H:%M:%S")
+                db.session.commit()
 
             step1 = ["오늘의 식단", "내일의 식단"]
             if content in step1:
@@ -65,6 +69,7 @@ class APIManager(metaclass=Singleton):
                     "history": [content]
                 }
                 message = MenuAdmin.returnScore()
+                message += "\n주관식 평가는 준비중입니다.\n실제로 먹어본 식단만 평가해주세요!"
                 return self.getEvalMsgObj(message, 1)
 
             step3 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
