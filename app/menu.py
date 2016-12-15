@@ -203,6 +203,7 @@ class DayMenu():
         return message
 
     def returnScore(self):
+        self.updateScore()
         message = ""
         times = ["아침", "점심", "저녁"]
         for place in self.items:
@@ -224,6 +225,10 @@ class DayMenu():
             return True
         else:
             return False
+
+    def updateScore(self):
+        for place in self.items:
+            place.updateScore()
 
     def update(self, date, menu):
         '''
