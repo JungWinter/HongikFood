@@ -39,23 +39,14 @@ class APIManager(metaclass=Singleton):
 
     def process(self, mode, data=None):
         if mode is "home":
-            MenuAdmin.updateMenu()
             msgObj = MessageAdmin.getHomeMessageObject()
             return msgObj
         elif mode is "message":
+            MenuAdmin.updateMenu()
             user_key = data["user_key"]
             request_type = data["type"]
             content = data["content"]
-            u = User.query.filter_by(user_key=user_key).first()
-            if u is None:
-                u = User(user_key)
-                db.session.add(u)
-                db.session.commit()
-            else:
-                u.last_active_date = datetime.strftime(
-                    datetime.utcnow() + timedelta(hours=9),
-                    "%Y.%m.%d %H:%M:%S")
-                db.session.commit()
+            DBAdmin.updateUserActionDate(user_key)
 
             step1 = ["오늘의 식단", "내일의 식단"]
             if content in step1:
@@ -92,51 +83,42 @@ class APIManager(metaclass=Singleton):
             if content in step4:
                 if UserSessionAdmin.checkExist(user_key):
                     now = datetime.utcnow() + timedelta(hours=9)
-                    date = datetime.strftime(now,"%Y.%m.%d")
+                    date = datetime.strftime(now, "%Y.%m.%d")
                     place = UserSessionAdmin.getHistory(user_key).pop()
                     time = content
                     timenow = datetime.time(now)
-
-                    u = User.query.filter_by(user_key=user_key).first()
-                    m = Menu.query.filter_by(
-                        date=date,
-                        place=place,
-                        time=time).first()
-                    if m is None:  # 해당 장소에 해당 시간대가 없음
-                        UserSessionAdmin.delete(user_key)
-                        return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
                     if timenow < MenuAdmin.timelimit[time]:
                         UserSessionAdmin.delete(user_key)
                         return self.getCustomMsgObj("아직 {}시간이 아닙니다.".format(time))
-                    p = Poll.query.filter_by(menu=m, user=u).first()
-                    if p is None:
-                        UserSessionAdmin.addHistory(user_key, time)
-                        message = "점수를 골라주세요."
-                        return self.getEvalMsgObj(message, 3)
-                    else:
+
+                    u = DBAdmin.query(User, user_key)
+                    m = DBAdmin.query(Menu, date, place, time)
+                    if m is None:  # 해당 장소에 해당 시간대가 없음
+                        UserSessionAdmin.delete(user_key)
+                        return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
+
+                    p = DBAdmin.query(Poll, m, u)
+                    if p:
                         UserSessionAdmin.delete(user_key)
                         return self.getCustomMsgObj("{}식당의 {}에 이미 투표하셨습니다.".format(place, time))
+                    UserSessionAdmin.addHistory(user_key, time)
+                    message = "점수를 골라주세요."
+                    return self.getEvalMsgObj(message, 3)
                 else:
                     raise
 
             step5 = ["1", "2", "3", "4", "5"]
             if content in step5:
                 if UserSessionAdmin.checkExist(user_key):
+                    now = datetime.utcnow() + timedelta(hours=9)
                     history = UserSessionAdmin.getHistory(user_key)
-                    date = datetime.strftime(
-                        datetime.utcnow() + timedelta(hours=9),
-                        "%Y.%m.%d")
+                    date = datetime.strftime(now, "%Y.%m.%d")
                     time = history[-1]
                     place = history[-2]
                     score = int(content)
-                    u = User.query.filter_by(user_key=user_key).first()
-                    m = Menu.query.filter_by(
-                        date=date,
-                        place=place,
-                        time=time).first()
-                    p = Poll(score, menu=m, user=u)
-                    db.session.add(p)
-                    db.session.commit()
+                    u = DBAdmin.query(User, user_key)
+                    m = DBAdmin.query(Menu, date, place, time)
+                    DBAdmin.addPoll(score, m, u)
                     message = "평가해주셔서 감사합니다."
                     UserSessionAdmin.delete(user_key)
                     return self.getEvalMsgObj(message, 4)
@@ -159,21 +141,14 @@ class APIManager(metaclass=Singleton):
 
         elif mode is "add":
             user_key = data["user_key"]
-            u = User(user_key)
-            db.session.add(u)
-            db.session.commit()
-
+            DBAdmin.addUser(user_key)
             managerLog(mode, user_key)
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
         elif mode is "block":
             user_key = data
             UserSessionAdmin.delete(user_key)
-            u = User.query.filter_by(user_key=user_key).first()
-            if u is not None:
-                db.session.delete(u)
-                db.session.commit()
-
+            DBAdmin.deleteUser(user_key)
             managerLog(mode, user_key)
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
@@ -184,7 +159,6 @@ class APIManager(metaclass=Singleton):
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
         elif mode is "fail":
-            UserSessionAdmin.delete(user_key)
             msgObj = MessageAdmin.getFailMessageObject()
             return msgObj
 
@@ -247,6 +221,60 @@ class UserSessionManager(metaclass=Singleton):
             return session[user_key]["history"][:]
         else:
             return ["오늘의 식단"]
+
+
+class DBManager(metaclass=Singleton):
+    def query(self, model, *args):
+        if model == User:
+            user_key = args[0]
+            return User.query.filter_by(user_key=user_key).first()
+        elif model == Menu:
+            if len(args) == 3:
+                date = args[0]
+                place = args[1]
+                time = args[2]
+                return Menu.query.filter_by(date=date, place=place, time=time).first()
+        elif model == Poll:
+            if len(args) == 2:
+                menu = args[0]
+                user = args[1]
+                return Poll.query.filter_by(menu=menu, user=user).first()
+
+    def updateUserActionDate(self, user_key):
+        u = self.query(User, user_key)
+        if u:
+            u.last_active_date = datetime.strftime(
+                datetime.utcnow() + timedelta(hours=9),
+                "%Y.%m.%d %H:%M:%S")
+            self.commit()
+        else:
+            self.addUser(user_key)
+
+    def addUser(self, user_key):
+        u = self.query(User, user_key)
+        if u is None:
+            u = User(user_key)
+            self.add(u)
+
+    def deleteUser(self, user_key):
+        u = self.query(User, user_key)
+        if u is not None:
+            self.delete(u)
+
+    def addPoll(self, score, menu, user):
+        p = Poll(score, menu=menu, user=user)
+        self.add(p)
+
+    def delete(self, obj):
+        db.session.delete(obj)
+        self.commit()
+
+    def add(self, obj):
+        db.session.add(obj)
+        self.commit()
+
+    def commit(self):
+        db.session.commit()
 
 
 class MenuManager(metaclass=Singleton):
@@ -313,3 +341,4 @@ APIAdmin = APIManager()
 MessageAdmin = MessageManager()
 UserSessionAdmin = UserSessionManager()
 MenuAdmin = MenuManager()
+DBAdmin = DBManager()
