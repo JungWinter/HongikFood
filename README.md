@@ -2,50 +2,56 @@
 
 ## 홍익대학교 학식알리미
 카카오톡 옐로아이디(@홍익대학교학식알리미)를 통해
-홍익대학교 학식의 구성을 간편하게 확인할 수 있는 서비스입니다.
+홍익대학교 학식의 구성을 간편하게 확인할 수 있는 챗봇서비스입니다.
 
-## Basis
-- Python flask
+## 기반
+- Python3 + flask + SQLAlchemy
 - ubuntu 14.04 + nginx + uwsgi
 - Kakaotalk YellowID
 
-## Overview
+## 개요
 ```
 user request
       |
       v
-Flask main app -> APIManager <- UserSessionManager <- DepthChecker
-                      ^
+Flask main app -> APIManager <-> UserSessionManager
+                      ^       <-> DBManager
                       |
-                  MessageManager <- Message <- keyboard
-                                            <- menu <- Requester
-                                                    <- Parser
-                                                    -> Database
+                  MessageManager <- Message <- MenuManager <- Requester
 ```
 
-## Flow
+### 파일 별 역할
+- `config.py` - Flask와 SQLAlchemy설정
+- `keyboard.py` - 응답 버튼 구현체
+- `message.py` - 추상화된 `Message` 클래스와 구현체 선언
+- `managers.py` - 실질적 데이터 처리 부분
+  - `APIManager` - REST API 구분 및 `view`에 응답객체 반환
+  - `MessageManager` - 적절한 `Message`와 `Keyboard`를 조합해 전달
+  - `MenuManager` - 맥락에 따라 적절한 `Menu Message`를 전달
+  - `UserSessionManager` - 전역 유저 세션 담당
+  - `DBManager` - 전역 DB 질의 담당
+- `models.py` - SQLAlchemy 스키마 선언
+- `views.py` - Flask 구현체, Kakaotalk yellowid API 명세에 따름
+- `menu.py` - `Menu` 클래스 선언, `Menu Message` 생성
+
+## 챗봇 응답 목록
 ```
-오늘의 식단 - [요약된 식단 표시] - 전체 식단 보기
-                                 학생회관
-                                 남문관
-                                 신기숙사
-                                 제1기숙사
-                                 교직원
-내일의 식단 - 위와 같음
-이번주 식단 - [학교 홈페이지의 식단표 링크]
+공통 - [요약된 식단 표시] - 전체 식단 보기
+                          학생회관
+                          남문관
+                          신기숙사
+                          교직원
+오늘의 식단 - 오늘의 점심
+             오늘의 저녁
+내일의 식단 - 내일의 아침
 식단 평가하기 - 학생회관 - 점심 - 1, 2, 3, 4, 5
                          저녁
                남문관
                신기숙사
-               제1기숙사
                교직원
 ```
 
 ## TODO
-- [ ] 서버에서 python3로 돌리기
-- [ ] 비동기IO 적용하기
-- [ ] Flask-RESTful 적용하기
-- [ ] 제1기숙사 식단 적용하기
 - [ ] Log기록 분석
   - [ ] 일별 사용량 추이
   - [ ] 오늘/내일/이번주 요청 횟수 추이
