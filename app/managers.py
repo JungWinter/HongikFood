@@ -34,6 +34,9 @@ class APIManager(metaclass=Singleton):
     def checkToday(self, string):
         return True if string[:2] == "오늘" else False
 
+    def checkWhole(self, string):
+        return True if string[:2] == "전체" else False
+
     def process(self, mode, data=None):
         if mode is "home":
             MenuAdmin.updateMenu()
@@ -56,42 +59,30 @@ class APIManager(metaclass=Singleton):
 
             step1 = ["오늘의 식단", "내일의 식단"]
             if content in step1:
-                session[user_key] = {
-                    "history": [content]
-                }
+                UserSessionAdmin.init(user_key, content)
                 summary = True
                 isToday = self.checkToday(content)
                 return self.getMsgObj(summary, isToday)
 
             step2 = ["식단 평가하기"]
             if content in step2:
-                session[user_key] = {
-                    "history": [content]
-                }
+                UserSessionAdmin.init(user_key, content)
                 message = MenuAdmin.returnScore()
                 message += "\n주관식 평가는 준비중입니다.\n실제로 먹어본 식단만 평가해주세요!"
                 return self.getEvalMsgObj(message, 1)
 
             step3 = ["전체 식단 보기", "학생회관", "남문관", "신기숙사", "제1기숙사", "교직원"]
             if content in step3:
-                if user_key in session:
-                    last = session[user_key]["history"][:]
-                else:
-                    last = ["오늘의 식단"]
+                last = UserSessionAdmin.getHistory(user_key)
                 if last[-1] in step1:
                     summary = False
                     isToday = self.checkToday(last[-1])
-                    if content == "전체 식단 보기":
-                        place = None
-                    else:
-                        place = content
-                    if user_key in session:
-                        del session[user_key]
+                    place = None if self.checkWhole(content) else content
+                    UserSessionAdmin.delete(user_key)
                     return self.getMsgObj(summary, isToday, place)
                 elif last[-1] in step2:  # 식단평가하기에서 place를 고른상태
                     place = content
-                    # 이미 user_key는 session에 있는걸 확인함
-                    session[user_key]["history"].append(place)
+                    UserSessionAdmin.addHistory(user_key, place)
                     message = "시간대를 골라주세요."
                     return self.getEvalMsgObj(message, 2)
                 else:
@@ -99,49 +90,39 @@ class APIManager(metaclass=Singleton):
 
             step4 = ["아침", "점심", "저녁"]
             if content in step4:
-                if user_key in session:
-                    date = datetime.strftime(
-                        datetime.utcnow() + timedelta(hours=9),
-                        "%Y.%m.%d")
-                    place = session[user_key]["history"][-1]
+                if UserSessionAdmin.checkExist(user_key):
+                    now = datetime.utcnow() + timedelta(hours=9)
+                    date = datetime.strftime(now,"%Y.%m.%d")
+                    place = UserSessionAdmin.getHistory(user_key).pop()
                     time = content
-                    timelimit = {
-                        "아침": createTime(hour=7, minute=20),
-                        "점심": createTime(hour=10, minute=50),
-                        "저녁": createTime(hour=16, minute=20),
-                    }
+                    timenow = datetime.time(now)
+
                     u = User.query.filter_by(user_key=user_key).first()
                     m = Menu.query.filter_by(
                         date=date,
                         place=place,
                         time=time).first()
                     if m is None:  # 해당 장소에 해당 시간대가 없음
-                        if user_key in session:
-                            del session[user_key]
+                        UserSessionAdmin.delete(user_key)
                         return self.getCustomMsgObj("{}식당에는 {}이 없습니다.".format(place, time))
-
-                    now = datetime.utcnow() + timedelta(hours=9)
-                    timenow = datetime.time(now)
-                    if timenow < timelimit[time]:
-                        if user_key in session:
-                            del session[user_key]
+                    if timenow < MenuAdmin.timelimit[time]:
+                        UserSessionAdmin.delete(user_key)
                         return self.getCustomMsgObj("아직 {}시간이 아닙니다.".format(time))
                     p = Poll.query.filter_by(menu=m, user=u).first()
                     if p is None:
-                        session[user_key]["history"].append(time)
+                        UserSessionAdmin.addHistory(user_key, time)
                         message = "점수를 골라주세요."
                         return self.getEvalMsgObj(message, 3)
                     else:
-                        if user_key in session:
-                            del session[user_key]
+                        UserSessionAdmin.delete(user_key)
                         return self.getCustomMsgObj("{}식당의 {}에 이미 투표하셨습니다.".format(place, time))
                 else:
                     raise
 
             step5 = ["1", "2", "3", "4", "5"]
             if content in step5:
-                if user_key in session:
-                    history = session[user_key]["history"][:]
+                if UserSessionAdmin.checkExist(user_key):
+                    history = UserSessionAdmin.getHistory(user_key)
                     date = datetime.strftime(
                         datetime.utcnow() + timedelta(hours=9),
                         "%Y.%m.%d")
@@ -157,24 +138,22 @@ class APIManager(metaclass=Singleton):
                     db.session.add(p)
                     db.session.commit()
                     message = "평가해주셔서 감사합니다."
-                    del session[user_key]
+                    UserSessionAdmin.delete(user_key)
                     return self.getEvalMsgObj(message, 4)
                 else:
                     raise
 
             step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
             if content in step11:
-                if user_key in session:
-                    del session[user_key]
                 summary = False
                 isToday = self.checkToday(content)
                 place = None
                 time = content[-2:]
+                UserSessionAdmin.delete(user_key)
                 return self.getMsgObj(summary, isToday, place, time)
 
             if content == "취소":
-                if user_key in session:
-                    del session[user_key]
+                UserSessionAdmin.delete(user_key)
                 return self.getCustomMsgObj("취소하셨습니다.")
             # 여기까지도 안걸러 졌으면 주관식 답변으로 간주
 
@@ -189,8 +168,7 @@ class APIManager(metaclass=Singleton):
             return msgObj
         elif mode is "block":
             user_key = data
-            if session.get(user_key) is not None:
-                session.pop(user_key)
+            UserSessionAdmin.delete(user_key)
             u = User.query.filter_by(user_key=user_key).first()
             if u is not None:
                 db.session.delete(u)
@@ -201,13 +179,12 @@ class APIManager(metaclass=Singleton):
             return msgObj
         elif mode is "exit":
             user_key = data
-            if session.get(user_key) is not None:
-                session.pop(user_key)
-
+            UserSessionAdmin.delete(user_key)
             managerLog(mode, user_key)
             msgObj = MessageAdmin.getSuccessMessageObject()
             return msgObj
         elif mode is "fail":
+            UserSessionAdmin.delete(user_key)
             msgObj = MessageAdmin.getFailMessageObject()
             return msgObj
 
@@ -249,14 +226,27 @@ class MessageManager(metaclass=Singleton):
 
 
 class UserSessionManager(metaclass=Singleton):
-    def add(self):
-        pass
+    def checkExist(self, user_key):
+        return True if user_key in session else False
 
-    def blcok(self):
-        pass
+    def init(self, user_key, content):
+        session[user_key] = {
+            "history": [content]
+        }
 
-    def exit(self):
-        pass
+    def delete(self, user_key):
+        if self.checkExist(user_key):
+            del user_key
+
+    def addHistory(self, user_key, action):
+        if self.checkExist(user_key):
+            session[user_key]["history"].append(action)
+
+    def getHistory(self, user_key):
+        if self.checkExist(user_key):
+            return session[user_key]["history"][:]
+        else:
+            return ["오늘의 식단"]
 
 
 class MenuManager(metaclass=Singleton):
@@ -269,6 +259,11 @@ class MenuManager(metaclass=Singleton):
         sat = DayMenu("토요일")
         self.weekend = [mon, tue, wed, thu, fri, sat]
         self.lastUpdateTime = 0
+        self.timelimit = {
+            "아침": createTime(hour=7, minute=20),
+            "점심": createTime(hour=10, minute=50),
+            "저녁": createTime(hour=16, minute=20),
+        }
         self.updateMenu()
 
     def updateMenu(self):
