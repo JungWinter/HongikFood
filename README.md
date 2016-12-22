@@ -51,8 +51,30 @@ Flask main app -> APIManager <-> UserSessionManager
                교직원
 ```
 
-## TODO
-- [ ] Log기록 분석
-  - [ ] 일별 사용량 추이
-  - [ ] 오늘/내일/이번주 요청 횟수 추이
-  - [ ] 사용자 분석
+### 로그 분석 - 2016.12.22 기준
+#### 이용횟수 Top5 유저
+![user request top10](https://github.com/JungWinter/HongikFood/blob/master/app/static/img/users_limit.png?raw=true)
+
+#### 요청 Top5 날짜
+![date top5](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/date_top5.png)
+
+#### 요청 Bottom5 날짜
+![date bottom5](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/date_bottom5.png)
+
+#### 업데이트 이전
+![all messages](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/messages_before_update.png)
+
+#### 업데이트 이후 (2016년 12월 10일~)
+![message after update](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/messages_after_update.png)
+
+#### 2016 하반기
+![message after update](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/2016.png)
+
+#### 월별
+![message after update](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/month.png)
+
+#### 2016 11월
+![message after update](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/2016-11.png)
+
+#### 2016년 12월 12일 (최다 이용 날짜)
+![message after update](https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/2016-12-12.png)
