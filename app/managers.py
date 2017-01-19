@@ -314,6 +314,7 @@ class MenuManager(metaclass=Singleton):
 
     def returnMenu(self, isToday, summary=False, place=None, time=None):
         self.updateMenu()
+        self.updateScore()
         wday = self.calcWday(isToday)
         message = ""
         if self.checkWday(wday):
@@ -328,6 +329,7 @@ class MenuManager(metaclass=Singleton):
         return message
 
     def returnScore(self):
+        self.updateScore()
         wday = self.calcWday(isToday=True)
         message = ""
         if self.checkWday(wday):
@@ -335,6 +337,11 @@ class MenuManager(metaclass=Singleton):
         else:
             "평가할 식단이 없습니다."
         return message
+
+    def updateScore(self):
+        wday = self.calcWday(isToday=True)
+        if self.checkWday(wday):
+            self.weekend[wday].updateScore()
 
 
 APIAdmin = APIManager()
