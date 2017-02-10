@@ -5,7 +5,6 @@ from .message import BaseMessage, HomeMessage, FailMessage, SuccessMessage
 from .message import SummaryMenuMessage, EvaluateMessage
 from .models import User, Poll, Menu
 from .menu import DayMenu
-from .myLogger import managerLog, customLog
 from .request import getDatesAndMenus
 
 
@@ -264,6 +263,10 @@ class DBManager(metaclass=Singleton):
     def addPoll(self, score, menu, user):
         p = Poll(score, menu=menu, user=user)
         self.add(p)
+
+    def addMenu(self, date, place, time, menu):
+        m = Menu(date, place, time, menu)
+        self.add(m)
 
     def delete(self, obj):
         db.session.delete(obj)

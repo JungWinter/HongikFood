@@ -40,6 +40,8 @@ def viewLog(mode, data=None):
             data["user_key"],
             data["type"],
             data["content"]))
+    elif mode is "keyboard":
+        app.logger.info("[keyboard] call home keyboard")
     elif mode is "add":
         app.logger.info("[join] user_key : {}".format(data["user_key"]))
     elif mode is "block":
