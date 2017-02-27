@@ -15,8 +15,11 @@ def _getSoup():
 
 
 def _soupToDates(soup):
-    thead = _tagTostr(soup.find("thead"))
-    head = thead.split()[1:]
+    try:
+        thead = _tagTostr(soup.find("thead"))
+        head = thead.split()[1:]
+    except AttributeError:
+        head = ["로딩중(0000.00.00)"] * 6
     key = [w[:3] for w in head]  # 월요일, 화요일, ...
     value = [w[4:-1] for w in head]  # 2016.11.21, 2016.11.22, ...
     dates = list(zip(key, value))
