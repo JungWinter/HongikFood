@@ -6,6 +6,7 @@ from .message import SummaryMenuMessage, EvaluateMessage
 from .models import User, Poll, Menu
 from .menu import DayMenu
 from .request import getDatesAndMenus
+from .myLogger import managerLog
 
 
 class Singleton(type):
