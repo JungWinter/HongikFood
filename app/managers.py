@@ -104,7 +104,9 @@ class APIManager(metaclass=Singleton):
                     message = "점수를 골라주세요."
                     return self.getEvalMsgObj(message, 3)
                 else:
-                    raise
+                    DBAdmin.addUser(user_key)
+                    managerLog(mode, user_key)
+                    self.process(mode, data)
 
             step5 = ["1", "2", "3", "4", "5"]
             if content in step5:
@@ -122,7 +124,9 @@ class APIManager(metaclass=Singleton):
                     UserSessionAdmin.delete(user_key)
                     return self.getEvalMsgObj(message, 4)
                 else:
-                    raise
+                    DBAdmin.addUser(user_key)
+                    managerLog(mode, user_key)
+                    self.process(mode, data)
 
             step11 = ["오늘의 점심", "오늘의 저녁", "내일의 아침"]
             if content in step11:
