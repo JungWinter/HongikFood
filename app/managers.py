@@ -106,6 +106,7 @@ class APIManager(metaclass=Singleton):
                     return self.getEvalMsgObj(message, 3)
                 else:
                     DBAdmin.addUser(user_key)
+                    UserSessionAdmin.init(user_key, content)
                     managerLog(mode, user_key)
                     self.process(mode, data)
 
@@ -126,6 +127,7 @@ class APIManager(metaclass=Singleton):
                     return self.getEvalMsgObj(message, 4)
                 else:
                     DBAdmin.addUser(user_key)
+                    UserSessionAdmin.init(user_key, content)
                     managerLog(mode, user_key)
                     self.process(mode, data)
 
