@@ -1,4 +1,5 @@
 from .keyboard import Keyboard
+from json import loads, dumps
 
 
 class Message:
@@ -34,7 +35,7 @@ class Message:
 class BaseMessage(Message):
     def __init__(self):
         super().__init__()
-        self.returnedMessage = Message.baseMessage
+        self.returnedMessage = loads(dumps(Message.baseMessage))
 
     def updateMessage(self, message):
         self.returnedMessage["message"]["text"] = message
@@ -43,6 +44,19 @@ class BaseMessage(Message):
         keyboard = Message.baseKeyboard
         keyboard["buttons"] = argKeyboard
         self.returnedMessage["keyboard"] = keyboard
+
+    def add_photo(self, url, width, height):
+        photo_message = {
+            "photo": {
+                "url": "http://www.hongik.ac.kr/front/images/local/header_logo.png",
+                "width": 198,
+                "height": 45,
+            },
+        }
+        photo_message["photo"]["url"] = url
+        photo_message["photo"]["width"] = width
+        photo_message["photo"]["height"] = height
+        self.returnedMessage["message"].update(photo_message)
 
 
 class EvaluateMessage(BaseMessage):

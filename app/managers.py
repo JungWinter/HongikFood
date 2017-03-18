@@ -178,6 +178,12 @@ class MessageManager(metaclass=Singleton):
         returnedMessage = BaseMessage()
         returnedMessage.updateMessage(message)
         returnedMessage.updateKeyboard(HomeMessage.returnHomeKeyboard())
+
+        if message == "식단 정보가 없습니다.":
+            url = "https://github.com/JungWinter/HongikFood/blob/master/app/static/img/20170320.jpg"
+            width = 642
+            height = 630
+            returnedMessage.add_photo(url, width, height)
         return returnedMessage
 
     def getMenuMessageObject(self, summary, isToday, place=None, time=None):
