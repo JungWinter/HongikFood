@@ -189,7 +189,8 @@ class MessageManager(metaclass=Singleton):
     def getMenuMessageObject(self, summary, isToday, place=None, time=None):
         message = MenuAdmin.returnMenu(isToday, summary, place, time)
         if message == "식단 정보가 없습니다.":
-            message += "\n현 상황에 대한 정리 : http://bit.ly/2mDvY4k \n"
+            message += "\n현 상황에 대한 정리 : http://bit.ly/2nDqLez \n"
+            # message += "\n현 상황에 대한 정리 : http://bit.ly/2mDvY4k \n"
             message += "<캠퍼스 이원화 반대 시위>\
                 \n날짜 : 2017년 3월 20일 월요일\
                 \n시간 : 낮 12시\
