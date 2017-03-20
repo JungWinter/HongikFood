@@ -188,12 +188,8 @@ class DayMenu():
             message += place.returnMenu(summary=summary) + "\n"
         if summary:
             message += "\n오른쪽으로 넘기시면 다른 버튼도 있습니다.\n"
-            message += "\n현 상황에 대한 정리 : http://bit.ly/2mDvY4k \
-                \n<캠퍼스 이원화 반대 시위>\
-                \n날짜 : 2017년 3월 20일 월요일\
-                \n시간 : 낮 12시\
-                \n장소 : 홍문관 르방 앞\
-                \n시위의 목적 : 총학 규탄 및 이원화 반대 의사 표명"
+            # 특정 메시지 전달 때 여기에 추가
+            # message += ""
         return message
 
     def returnPlaceMenu(self, place):

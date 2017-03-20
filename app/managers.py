@@ -180,23 +180,15 @@ class MessageManager(metaclass=Singleton):
         returnedMessage.updateKeyboard(HomeMessage.returnHomeKeyboard())
 
         if message[:12] == "식단 정보가 없습니다.":
-            url = "https://raw.githubusercontent.com/JungWinter/HongikFood/master/app/static/img/20170320.jpg"
-            width = 642
-            height = 630
             # returnedMessage.add_photo(url, width, height)
+            pass
         return returnedMessage
 
     def getMenuMessageObject(self, summary, isToday, place=None, time=None):
         message = MenuAdmin.returnMenu(isToday, summary, place, time)
         if message == "식단 정보가 없습니다.":
-            message += "\n현 상황에 대한 정리 : http://bit.ly/2nDqLez \n"
-            # message += "\n현 상황에 대한 정리 : http://bit.ly/2mDvY4k \n"
-            message += "<캠퍼스 이원화 반대 시위>\
-                \n날짜 : 2017년 3월 20일 월요일\
-                \n시간 : 낮 12시\
-                \n장소 : 홍문관 르방 앞\
-                \n시위의 목적 : 총학 규탄 및 이원화 반대 의사 표명\
-                \n시위의 방식 : 입장을 명료하게 표명할 수 있는 개인 피켓 또는 플래카드를 지참하여 예정된 구호 외치기"
+            # 특성 메시지 전달 때 이곳에
+            # message += "..." 으로 추가
             return self.getCustomMessageObject(message)
         if summary:
             return SummaryMenuMessage(message, isToday)
