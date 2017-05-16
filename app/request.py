@@ -43,6 +43,10 @@ def _soupToMenus(soup):
         transmenus = [list(menu) for menu in zip(*[iter(menus)]*6)]
         rows = [iter(i) for i in transmenus]
         cols = [list(col) for col in zip(*rows)]
+    if len(menus) == 60:
+        transmenus = [list(menu) for menu in zip(*[iter(menus)]*6)]
+        rows = [iter(i) for i in transmenus]
+        cols = [list(col) for col in zip(*rows)]
     return cols
 
 
