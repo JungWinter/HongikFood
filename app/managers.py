@@ -48,7 +48,7 @@ class APIManager(metaclass=Singleton):
             content = data["content"]
             DBAdmin.updateUserActionDate(user_key)
 
-            step1 = ["오늘의 식단", "내일의 식단"]
+            step1 = ["오늘의 식단", "내일의 식단", "오늘의 메뉴", "내일의 메뉴"]
             if content in step1:
                 UserSessionAdmin.init(user_key, content)
                 summary = True

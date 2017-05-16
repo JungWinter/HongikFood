@@ -35,6 +35,7 @@ def _soupToMenus(soup):
     총 54개 (하루에 9개 * 6일)
     6개씩 건너뛰며 횡적 배열을 종적 배열로 바꿔줘야함
     '''
+    cols = []
     menus = [_tagTostr(i).split() for i in soup.find_all("div", class_="daily-menu")]
     for item in menus:
         if item and item[0] in ["[중식]", "[석식]"]:
