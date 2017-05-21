@@ -40,6 +40,8 @@ def _soupToMenus(soup):
     for item in menus:
         if item and item[0] in ["[중식]", "[석식]"]:
             del item[0]
+    if menus == []:
+        cols = [["-"] * 10] * 6
     if len(menus) == 54:
         transmenus = [list(menu) for menu in zip(*[iter(menus)]*6)]
         rows = [iter(i) for i in transmenus]
