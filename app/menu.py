@@ -73,12 +73,22 @@ class PlaceMenu():
             # 메뉴가 비어있으면 건너뛰기
             if self.items[key]["메뉴"]:
                 if self.items[key]["정보"] == "":
-                    message += "■ {}\n".format(key)
+                    if self.place == "남문관" and key == "아침":
+                        message += "■ 점심: 한식\n"
+                    elif self.place == "남문관" and key == "점심":
+                        message += "■ 점심: 양식\n"
+                    else:
+                        message += "■ {}\n".format(key)
                 else:
-                    message += "■ {} ({})\n".format(
-                        key,
-                        self.items[key]["정보"]
-                    )
+                    if self.place == "남문관" and key == "아침":
+                        message += "■ 점심: 한식 ({})\n".format(self.items[key]["정보"])
+                    elif self.place == "남문관" and key == "점심":
+                        message += "■ 점심: 양식 ({})\n".format(self.items[key]["정보"])
+                    else:
+                        message += "■ {} ({})\n".format(
+                            key,
+                            self.items[key]["정보"]
+                        )
                 # 평점 붙여주기
                 message += "▶ " + self.items[key]["평점"] + "\n"
                 # 메뉴 붙여주기
@@ -161,8 +171,8 @@ class DayMenu():
             "17:00-19:00",
             # 남문관 정보
             "",
-            "",
-            "",
+            "11:30-14:00",
+            "17:30-19:00",
             # 교직원 정보
             "",
             "11:30-14:20",
@@ -173,7 +183,7 @@ class DayMenu():
             "17:30-19:20"
         ]
         time = ["아침", "점심", "저녁"]
-        price = ["3,900원", "", "6,000원", "3,900원"]
+        price = ["3,900원", "3,900원", "6,000원", "3,900원"]
         for place in self.items:
             place.price = price.pop(0)
             for t in time:
@@ -237,14 +247,14 @@ class DayMenu():
     def update(self, date, menu):
         '''
         받은 메뉴 쪼개기
-        하루에 총 9개고 4개로 나눠야함
-        2 / 2 / 2 / 3
+        하루에 총 10개고 4개로 나눠야함
+        2 / 3 / 2 / 3
         '''
         divMenu = []
         divMenu.append([menu[0], menu[1]])
-        divMenu.append([menu[2], menu[3]])
-        divMenu.append([menu[4], menu[5]])
-        divMenu.append([menu[6], menu[7], menu[8]])
+        divMenu.append([menu[2], menu[3], menu[4]])
+        divMenu.append([menu[5], menu[6]])
+        divMenu.append([menu[7], menu[8], menu[9]])
         if self.updateSelf(date):
             for index, item in enumerate(self.items):
                 item.updateDate(date)
