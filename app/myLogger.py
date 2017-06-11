@@ -1,7 +1,11 @@
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
 from app import app
+import os
+import time
 
+os.environ["TZ"] = "Asia/Seoul"
+time.tzset()
 
 handler = RotatingFileHandler(
     "./app/log/HongikFood.log",
@@ -10,7 +14,7 @@ handler = RotatingFileHandler(
     encoding="utf-8"
 )
 handler.setFormatter(Formatter(
-    "%(asctime)s-%(message)s"
+    "%(asctime)-.19s-%(message)s"
 ))
 
 
