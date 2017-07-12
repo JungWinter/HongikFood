@@ -222,7 +222,7 @@ class UserSessionManager(metaclass=Singleton):
 
     def delete(self, user_key):
         if self.checkExist(user_key):
-            del user_key
+            del session[user_key]
 
     def addHistory(self, user_key, action):
         if self.checkExist(user_key):
