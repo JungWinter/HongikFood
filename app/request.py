@@ -46,6 +46,8 @@ def _soupToMenus(soup):
         transmenus = [list(menu) for menu in zip(*[iter(menus)]*6)]
         rows = [iter(i) for i in transmenus]
         cols = [list(col) for col in zip(*rows)]
+    for day in cols:
+        del day[4]
     return cols
 
 
