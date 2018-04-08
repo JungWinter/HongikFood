@@ -1,4 +1,8 @@
 # HongikFood
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
+## 이 프로젝트는 더 이상 유지보수 되지 않습니다.
+**대신 새로운 학식알리미 [chef-hong](https://github.com/jungwinter/chef-hong)을 참고해주세요.**
 
 ## 홍익대학교 학식알리미
 카카오톡 옐로아이디(@홍익대학교학식알리미)를 통해
